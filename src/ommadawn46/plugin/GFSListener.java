@@ -48,9 +48,8 @@ public class GFSListener implements Listener{
 		Player player = e.getPlayer();
 		ItemStack itemStack = player.getItemInHand();
 		GFSItem item = this.plugin.getItem(itemStack);
-		if(item != null && item instanceof Gun && e.isSneaking()){
-			// スニークボタンでリロード
-			((Gun)item).playerAction(player, "SNEAK");
+		if(item != null && e.isSneaking()){
+			item.playerAction(player, "SNEAK");
 		}
 	}
 

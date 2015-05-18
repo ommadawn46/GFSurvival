@@ -8,26 +8,20 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.util.Vector;
+import org.bukkit.util.BlockIterator;
 
-public class Gun extends GFSItem{
+public class TeleportGun extends GFSItem{
 	private int ammoSize;
 	private int ammoRemain;
 	private int cooltime;
 	private int reloadTime;
-
-	private EntityType bulletType;
-	private double bulletDamage;
-	private double bulletSpeed;
+	private int range;
 
 	private Sound shotSound;
 	private float shotSoundPitch;
@@ -36,19 +30,15 @@ public class Gun extends GFSItem{
 	private Sound finishReloadSound;
 	private float finishReloadPitch;
 
-	public Gun(GunForSurvival plugin, String name, Material material, List<String> lore, int ammoSize,
-			int cooltime, int reloadTime, EntityType bulletType, double bulletDamage, double bulletSpeed,
+	public TeleportGun(GunForSurvival plugin, String rawName, Material material, List<String> lore, int ammoSize, int cooltime, int reloadTime, int range,
 			Sound shotSound, float shotSoundPitch, Sound reloadSound, float reloadSoundPitch, Sound finishReloadSound, float finishReloadPitch){
-		super(plugin, name, material, lore);
+		super(plugin, rawName, material, lore);
 
 		this.ammoSize = ammoSize;
 		this.ammoRemain = ammoSize;
 		this.cooltime = cooltime;
 		this.reloadTime = reloadTime;
-
-		this.bulletType = bulletType;
-		this.bulletDamage = bulletDamage;
-		this.bulletSpeed = bulletSpeed;
+		this.range = range;
 
 		this.shotSound = shotSound;
 		this.shotSoundPitch = shotSoundPitch;
@@ -64,7 +54,7 @@ public class Gun extends GFSItem{
 		itemStack.setItemMeta(itemMeta);
 	}
 
-	public Gun(GunForSurvival plugin, ItemStack itemStack){
+	public TeleportGun(GunForSurvival plugin, ItemStack itemStack) {
 		super(plugin, itemStack);
 
 		ItemMeta itemMeta = itemStack.getItemMeta();
@@ -74,13 +64,10 @@ public class Gun extends GFSItem{
 		this.ammoRemain = Integer.parseInt(ammo[0]);
 		this.ammoSize = Integer.parseInt(ammo[1]);
 
-		Gun original = (Gun) this.plugin.itemMap.get(rawName);
+		TeleportGun original = (TeleportGun) this.plugin.itemMap.get(rawName);
 		this.cooltime = original.getCooltime();
 		this.reloadTime = original.getReloadTime();
-
-		this.bulletType = original.getBulletType();
-		this.bulletDamage = original.getBulletDamage();
-		this.bulletSpeed = original.getBulletSpeed();
+		this.range = original.getRange();
 
 		this.shotSound = original.getShotSound();
 		this.shotSoundPitch = original.getShotSoundPitch();
@@ -93,13 +80,13 @@ public class Gun extends GFSItem{
 	@Override
 	public String makeDisplayName(String rawName) {
 		// 表示名の設定
-		return ChatColor.GRAY + rawName + " <"+ammoRemain+"/"+ammoSize+">";
+		return ChatColor.DARK_AQUA + rawName + " <"+ammoRemain+"/"+ammoSize+">";
 	}
 
 	@Override
 	public String getRawNameFromDisplayName(String name) {
 		// 表示名から本来の名前を取得
-		return name.split(ChatColor.GRAY +"")[1].split(" <")[0];
+		return name.split(ChatColor.DARK_AQUA +"")[1].split(" <")[0];
 	}
 
 	public int getCooltime(){
@@ -108,14 +95,8 @@ public class Gun extends GFSItem{
 	public int getReloadTime(){
 		return reloadTime;
 	}
-	public EntityType getBulletType(){
-		return bulletType;
-	}
-	public double getBulletDamage(){
-		return bulletDamage;
-	}
-	public double getBulletSpeed(){
-		return bulletSpeed;
+	private int getRange() {
+		return range;
 	}
 	public Sound getShotSound(){
 		return shotSound;
@@ -137,7 +118,7 @@ public class Gun extends GFSItem{
 	}
 
 	@Override
-	public void playerAction(Player player, String action){
+	public void playerAction(Player player, String action) {
 		if(action.equals("LEFT_CLICK")){
 			zoom(player);
 		}else if(action.equals("RIGHT_CLICK")){
@@ -145,24 +126,6 @@ public class Gun extends GFSItem{
 		}else if(action.equals("SNEAK")){
 			reload(player);
 		}
-	}
-
-	public void hit(Projectile proj, Entity entity){
-		if(!proj.getType().equals(bulletType)){
-			// 銃弾と異なるEntityTypeのとき
-			return;
-		}
-		if(entity instanceof LivingEntity){
-			// 着弾した相手に固定ダメージを与える
-			LivingEntity life = (LivingEntity) entity;
-			double currentHP = life.getHealth();
-			currentHP = currentHP < bulletDamage ? 0 : currentHP - bulletDamage;
-			life.setHealth(currentHP);
-		}
-	}
-
-	public void hit(Location loc){
-		// 着弾場所に何かしたいならここに書く
 	}
 
 	private void shot(Player player){
@@ -175,15 +138,17 @@ public class Gun extends GFSItem{
 			return;
 		}
 		if(ammoRemain > 0){
-			// 銃弾を発射する
-			Location loc = player.getLocation();
-			Vector vec = new Vector(loc.getDirection().getX()*bulletSpeed ,loc.getDirection().getY()*bulletSpeed ,loc.getDirection().getZ()*bulletSpeed);
-			Entity bullet = player.getWorld().spawnEntity(loc.add(loc.getDirection().getX()*1.5, 1.6 + loc.getDirection().getY()*1.5, loc.getDirection().getZ()*1.5), bulletType);
-			bullet.setVelocity(vec);
-			if(bullet instanceof Projectile){
-				((Projectile)bullet).setShooter(player);
+			// 視線上のブロックへワープする
+			Block target = getTargetBlock(player, range);
+
+			if(target == null){
+				return;
 			}
-			loc.getWorld().playSound(loc, shotSound, 3, shotSoundPitch);
+
+			Location loc = target.getLocation();
+
+			player.teleport(loc);
+			player.getWorld().playSound(loc, shotSound, 3, shotSoundPitch);
 
 			ammoRemain--;
 			ItemMeta itemMeta = itemStack.getItemMeta();
@@ -204,6 +169,26 @@ public class Gun extends GFSItem{
 			// 弾切れ
 			reload(player);
 		}
+	}
+
+	private Block getTargetBlock(Player player, int range) {
+	    // 視線上のブロックを取得
+	    BlockIterator it = new BlockIterator(player, range);
+	    Block[] bufferBlock = new Block[3];
+
+	    while (it.hasNext()) {
+	    	bufferBlock[0] = bufferBlock[1];
+	    	bufferBlock[1] = bufferBlock[2];
+	    	bufferBlock[2] = it.next();
+
+	        if (bufferBlock[2].getType() != Material.AIR) {
+	            // ブロックが見つかった
+	            return bufferBlock[0];
+	        }
+	    }
+
+	    // 最後までブロックがみつからなかった
+	    return null;
 	}
 
 	private void zoom(Player player){

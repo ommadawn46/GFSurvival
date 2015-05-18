@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
@@ -38,6 +37,7 @@ public class GunForSurvival extends JavaPlugin{
 
     @Override
     public void onDisable() {
+    	getServer().resetRecipes();
     }
 
     @Override
@@ -104,7 +104,8 @@ public class GunForSurvival extends JavaPlugin{
 
     	// アイテムの種類を設定する
     	List<String> itemTypes = new ArrayList<String>();
-    	itemTypes.add("Gun"); // 今はGunだけ
+    	itemTypes.add("Gun");
+    	itemTypes.add("TeleportGun");
 
     	for(String itemType: itemTypes){
     		List<Map<?, ?>> itemList = itemData.getMapList(itemType);
@@ -132,8 +133,23 @@ public class GunForSurvival extends JavaPlugin{
     				itemMap.put(name, new Gun(this, name, material, lore, ammoSize, cooltime, reloadtime,
     						bulletType, bulletDamage, bulletSpeed,
     						shotSound, shotSoundPitch, reloadSound, reloadSoundPitch, finishReloadSound, finishReloadSoundPitch));
-    				System.out.println(itemType + ": " + name + " is Loaded");
+    			}else if(itemType.equals("TeleportGun")){
+    				int ammoSize = Integer.parseInt((String) itemInfo.get("AmmoSize"));
+    				int cooltime = Integer.parseInt((String) itemInfo.get("Cooltime"));
+    				int reloadtime = Integer.parseInt((String) itemInfo.get("Reloadtime"));
+    				int range = Integer.parseInt((String) itemInfo.get("Range"));
+
+    				Sound shotSound = Sound.valueOf((String)itemInfo.get("ShotSound"));
+    				float shotSoundPitch = Float.parseFloat((String)itemInfo.get("ShotSoundPitch"));
+    				Sound reloadSound = Sound.valueOf((String)itemInfo.get("ReloadSound"));
+    				float reloadSoundPitch = Float.parseFloat((String)itemInfo.get("ReloadSoundPitch"));
+    				Sound finishReloadSound = Sound.valueOf((String)itemInfo.get("FinishReloadSound"));
+    				float finishReloadSoundPitch = Float.parseFloat((String)itemInfo.get("FinishReloadSoundPitch"));
+
+    				itemMap.put(name, new TeleportGun(this, name, material, lore, ammoSize, cooltime, reloadtime, range,
+    						shotSound, shotSoundPitch, reloadSound, reloadSoundPitch, finishReloadSound, finishReloadSoundPitch));
     			}
+    			System.out.println(itemType + ": " + name + " is Loaded");
     		}
     	}
 
@@ -163,15 +179,13 @@ public class GunForSurvival extends JavaPlugin{
     		return null;
     	}
 
-    	String regex = "^"+ChatColor.GRAY+".*<[0-9]+/[0-9]+>";
-    	Pattern p = Pattern.compile(regex);
-    	Matcher m = p.matcher(name);
-    	if(m.find()){
+    	if(Pattern.compile("^"+ChatColor.GRAY+".*<[0-9]+/[0-9]+>").matcher(name).find()){
     		return new Gun(this, itemStack);
+    	}else if(Pattern.compile("^"+ChatColor.DARK_AQUA+".*<[0-9]+/[0-9]+>").matcher(name).find()){
+    		return new TeleportGun(this, itemStack);
     	}else{
     		return null;
     	}
-
     }
 
     private ItemStack getItemStack(String name) {
