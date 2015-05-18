@@ -106,6 +106,7 @@ public class GunForSurvival extends JavaPlugin{
     	List<String> itemTypes = new ArrayList<String>();
     	itemTypes.add("Gun");
     	itemTypes.add("TeleportGun");
+    	itemTypes.add("ThunderRod");
 
     	for(String itemType: itemTypes){
     		List<Map<?, ?>> itemList = itemData.getMapList(itemType);
@@ -115,6 +116,7 @@ public class GunForSurvival extends JavaPlugin{
     			@SuppressWarnings("unchecked")
     			List<String> lore = (List<String>) itemInfo.get("Lore");
     			if(itemType.equals("Gun")){
+    				// 銃
     				int ammoSize = Integer.parseInt((String) itemInfo.get("AmmoSize"));
     				int cooltime = Integer.parseInt((String) itemInfo.get("Cooltime"));
     				int reloadtime = Integer.parseInt((String) itemInfo.get("Reloadtime"));
@@ -133,7 +135,9 @@ public class GunForSurvival extends JavaPlugin{
     				itemMap.put(name, new Gun(this, name, material, lore, ammoSize, cooltime, reloadtime,
     						bulletType, bulletDamage, bulletSpeed,
     						shotSound, shotSoundPitch, reloadSound, reloadSoundPitch, finishReloadSound, finishReloadSoundPitch));
+
     			}else if(itemType.equals("TeleportGun")){
+    				// テレポート銃
     				int ammoSize = Integer.parseInt((String) itemInfo.get("AmmoSize"));
     				int cooltime = Integer.parseInt((String) itemInfo.get("Cooltime"));
     				int reloadtime = Integer.parseInt((String) itemInfo.get("Reloadtime"));
@@ -148,6 +152,13 @@ public class GunForSurvival extends JavaPlugin{
 
     				itemMap.put(name, new TeleportGun(this, name, material, lore, ammoSize, cooltime, reloadtime, range,
     						shotSound, shotSoundPitch, reloadSound, reloadSoundPitch, finishReloadSound, finishReloadSoundPitch));
+
+    			}else if(itemType.equals("ThunderRod")){
+    				// 雷の杖
+    				int cooltime = Integer.parseInt((String) itemInfo.get("Cooltime"));
+    				int range = Integer.parseInt((String) itemInfo.get("Range"));
+
+    				itemMap.put(name, new ThunderRod(this, name, material, lore, cooltime, range));
     			}
     			System.out.println(itemType + ": " + name + " is Loaded");
     		}
@@ -183,6 +194,8 @@ public class GunForSurvival extends JavaPlugin{
     		return new Gun(this, itemStack);
     	}else if(Pattern.compile("^"+ChatColor.DARK_AQUA+".*<[0-9]+/[0-9]+>").matcher(name).find()){
     		return new TeleportGun(this, itemStack);
+    	}else if(Pattern.compile("^"+ChatColor.GOLD).matcher(name).find()){
+    		return new ThunderRod(this, itemStack);
     	}else{
     		return null;
     	}

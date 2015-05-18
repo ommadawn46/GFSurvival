@@ -2,6 +2,7 @@ package ommadawn46.plugin;
 
 import java.util.regex.Pattern;
 
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
@@ -97,7 +98,20 @@ public class GFSListener implements Listener{
 				GFSItem item = this.plugin.getItem(itemStack);
 				// プレイヤーが持っているのは銃か
 				if(item instanceof Gun){
-					((Gun)item).hit(proj, e.getEntity());
+					((Gun)item).hit(proj, e);
+				}
+			}
+		}else if(e.getDamager().getType().equals(EntityType.LIGHTNING)){
+			if(e.getEntity() instanceof Player){
+				Player player = (Player) e.getEntity();
+				ItemStack itemStack = player.getItemInHand();
+				if(itemStack == null){
+					return;
+				}
+				GFSItem item = this.plugin.getItem(itemStack);
+				if(item instanceof ThunderRod){
+					// プレイヤーが雷の杖を持っているときはダメージを無効化
+					e.setDamage(0);
 				}
 			}
 		}

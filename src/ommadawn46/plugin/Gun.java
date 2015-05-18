@@ -10,9 +10,9 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
@@ -147,18 +147,13 @@ public class Gun extends GFSItem{
 		}
 	}
 
-	public void hit(Projectile proj, Entity entity){
+	public void hit(Projectile proj, EntityDamageByEntityEvent e){
 		if(!proj.getType().equals(bulletType)){
 			// 銃弾と異なるEntityTypeのとき
 			return;
 		}
-		if(entity instanceof LivingEntity){
-			// 着弾した相手に固定ダメージを与える
-			LivingEntity life = (LivingEntity) entity;
-			double currentHP = life.getHealth();
-			currentHP = currentHP < bulletDamage ? 0 : currentHP - bulletDamage;
-			life.setHealth(currentHP);
-		}
+		// ダメージをセットする
+		e.setDamage(bulletDamage);
 	}
 
 	public void hit(Location loc){

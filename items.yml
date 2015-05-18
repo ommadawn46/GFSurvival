@@ -1,5 +1,5 @@
 Gun:
-- Name: TestGun1
+- Name: Gun
   Material: IRON_INGOT
   Lore:
   - This is a Gun for Test.
@@ -17,7 +17,7 @@ Gun:
   FinishReloadSound: ANVIL_LAND
   FinishReloadSoundPitch: '2.0'
 
-- Name: TestGun2
+- Name: RocketLunchar
   Material: GOLD_INGOT
   Lore:
   - This is a Gun for Test.
@@ -40,7 +40,7 @@ TeleportGun:
   Material: DIAMOND
   Lore:
   - This is a TeleportGun for Test.
-  - TeleportGun
+  - Teleport Gun
   AmmoSize: '3'
   Cooltime: '20'
   Reloadtime: '100'
@@ -51,3 +51,12 @@ TeleportGun:
   ReloadSoundPitch: '0.0'
   FinishReloadSound: SLIME_WALK2
   FinishReloadSoundPitch: '0.0'
+
+ThunderRod:
+- Name: ThunderRod
+  Material: BLAZE_ROD
+  Lore:
+  - This is a ThunderRod for Test.
+  - Thunder Rod
+  Cooltime: '30'
+  Range: '100'
