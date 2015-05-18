@@ -1,0 +1,36 @@
+Gun:
+- Name: TestGun1
+  Material: IRON_INGOT
+  Lore:
+  - This is a Gun for Test.
+  - Gun
+  AmmoSize: '30'
+  Cooltime: '3'
+  Reloadtime: '50'
+  BulletType: SNOWBALL
+  BulletDamage: '2.0'
+  BulletSpeed: '4.0'
+  ShotSound: BLAZE_HIT
+  ShotSoundPitch: '2.0'
+  ReloadSound: ANVIL_USE
+  ReloadSoundPitch: '2.0'
+  FinishReloadSound: ANVIL_LAND
+  FinishReloadSoundPitch: '2.0'
+
+- Name: TestGun2
+  Material: GOLD_INGOT
+  Lore:
+  - This is a Gun for Test.
+  - Rocket Launcher
+  AmmoSize: '5'
+  Cooltime: '12'
+  Reloadtime: '50'
+  BulletType: FIREBALL
+  BulletDamage: '10.0'
+  BulletSpeed: '3.0'
+  ShotSound: BLAZE_HIT
+  ShotSoundPitch: '1.0'
+  ReloadSound: ANVIL_USE
+  ReloadSoundPitch: '1.0'
+  FinishReloadSound: ANVIL_LAND
+  FinishReloadSoundPitch: '1.0'

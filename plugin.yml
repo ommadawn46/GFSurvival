@@ -1,0 +1,10 @@
+name: GunForSurvival
+main: ommadawn46.plugin.GunForSurvival
+version: 0.0.1
+
+commands:
+   gfs:
+      description: Give A "Gun For Survival" to Player
+      usage: /gfs [player] [itemName]
+      permission: GunForSurvival.gts
+      permission-message: You don't have <permission>
