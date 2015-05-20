@@ -15,6 +15,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.BlockIterator;
+import org.bukkit.util.Vector;
 
 public class TeleportGun extends GFSItem{
 	private int ammoSize;
@@ -145,9 +146,11 @@ public class TeleportGun extends GFSItem{
 				return;
 			}
 
-			Location loc = target.getLocation();
+			Vector dic = player.getLocation().getDirection();
+			Location loc = target.getLocation().setDirection(dic);
 
 			player.teleport(loc);
+			player.setVelocity(dic.multiply(0.5));
 			player.getWorld().playSound(loc, shotSound, 3, shotSoundPitch);
 
 			ammoRemain--;
