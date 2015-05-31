@@ -9,10 +9,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
@@ -107,15 +105,19 @@ public class GunForSurvival extends JavaPlugin{
     	itemTypes.add("Gun");
     	itemTypes.add("TeleportGun");
     	itemTypes.add("ThunderRod");
+    	itemTypes.add("FlyingPotion");
 
     	for(String itemType: itemTypes){
     		List<Map<?, ?>> itemList = itemData.getMapList(itemType);
     		for(Map<?, ?> itemInfo: itemList){
     			String name = (String) itemInfo.get("Name");
     			Material material = Material.valueOf((String)itemInfo.get("Material"));
+
     			@SuppressWarnings("unchecked")
     			List<String> lore = (List<String>) itemInfo.get("Lore");
+
     			if(itemType.equals("Gun")){
+
     				// 銃
     				int ammoSize = Integer.parseInt((String) itemInfo.get("AmmoSize"));
     				int cooltime = Integer.parseInt((String) itemInfo.get("Cooltime"));
@@ -137,6 +139,7 @@ public class GunForSurvival extends JavaPlugin{
     						shotSound, shotSoundPitch, reloadSound, reloadSoundPitch, finishReloadSound, finishReloadSoundPitch));
 
     			}else if(itemType.equals("TeleportGun")){
+
     				// テレポート銃
     				int ammoSize = Integer.parseInt((String) itemInfo.get("AmmoSize"));
     				int cooltime = Integer.parseInt((String) itemInfo.get("Cooltime"));
@@ -154,11 +157,22 @@ public class GunForSurvival extends JavaPlugin{
     						shotSound, shotSoundPitch, reloadSound, reloadSoundPitch, finishReloadSound, finishReloadSoundPitch));
 
     			}else if(itemType.equals("ThunderRod")){
+
     				// 雷の杖
     				int cooltime = Integer.parseInt((String) itemInfo.get("Cooltime"));
     				int range = Integer.parseInt((String) itemInfo.get("Range"));
 
     				itemMap.put(name, new ThunderRod(this, name, material, lore, cooltime, range));
+
+    			}else if(itemType.equals("FlyingPotion")){
+
+    				// 飛行ポーション
+    				int duration = Integer.parseInt((String) itemInfo.get("Duration"));
+    				Sound consumeSound = Sound.valueOf((String)itemInfo.get("ConsumeSound"));
+    				float consumeSoundPitch = Float.parseFloat((String)itemInfo.get("ConsumeSoundPitch"));
+
+    				itemMap.put(name, new FlyingPotion(this, name, material, lore, duration, consumeSound, consumeSoundPitch));
+
     			}
     			System.out.println(itemType + ": " + name + " is Loaded");
     		}
@@ -190,15 +204,15 @@ public class GunForSurvival extends JavaPlugin{
     		return null;
     	}
 
-    	if(Pattern.compile("^"+ChatColor.GRAY+".*<[0-9]+/[0-9]+>").matcher(name).find()){
-    		return new Gun(this, itemStack);
-    	}else if(Pattern.compile("^"+ChatColor.DARK_AQUA+".*<[0-9]+/[0-9]+>").matcher(name).find()){
-    		return new TeleportGun(this, itemStack);
-    	}else if(Pattern.compile("^"+ChatColor.GOLD).matcher(name).find()){
-    		return new ThunderRod(this, itemStack);
-    	}else{
-    		return null;
+    	// ItemStackの情報をもとにitemMapの中から該当するアイテムを探す
+    	for(Map.Entry<String, GFSItem> itemEntry: itemMap.entrySet()){
+    		GFSItem item = itemEntry.getValue();
+    		if(item.isThisItem(itemStack)){
+    			return item;
+    		}
     	}
+
+    	return null;
     }
 
     private ItemStack getItemStack(String name) {

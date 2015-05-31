@@ -2,7 +2,7 @@ Gun:
 - Name: Gun
   Material: IRON_INGOT
   Lore:
-  - This is a Gun for Test.
+  - This is a Gun.
   - Gun
   AmmoSize: '30'
   Cooltime: '3'
@@ -20,7 +20,7 @@ Gun:
 - Name: RocketLunchar
   Material: GOLD_INGOT
   Lore:
-  - This is a Gun for Test.
+  - This is a Gun.
   - Rocket Launcher
   AmmoSize: '5'
   Cooltime: '16'
@@ -39,7 +39,7 @@ TeleportGun:
 - Name: TeleportGun
   Material: DIAMOND
   Lore:
-  - This is a TeleportGun for Test.
+  - This is a TeleportGun.
   - Teleport Gun
   AmmoSize: '3'
   Cooltime: '20'
@@ -56,7 +56,17 @@ ThunderRod:
 - Name: ThunderRod
   Material: BLAZE_ROD
   Lore:
-  - This is a ThunderRod for Test.
+  - This is a ThunderRod.
   - Thunder Rod
   Cooltime: '30'
   Range: '100'
+
+FlyingPotion:
+- Name: FlyingPotion
+  Material: POTION
+  Lore:
+  - This is a FlyingPotion.
+  - Flying Potion
+  Duration: "100"
+  ConsumeSound: ENDERMAN_TELEPORT
+  ConsumeSoundPitch: '1.5'

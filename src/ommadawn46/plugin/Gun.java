@@ -21,7 +21,6 @@ import org.bukkit.util.Vector;
 
 public class Gun extends GFSItem{
 	private int ammoSize;
-	private int ammoRemain;
 	private int cooltime;
 	private int reloadTime;
 
@@ -40,9 +39,9 @@ public class Gun extends GFSItem{
 			int cooltime, int reloadTime, EntityType bulletType, double bulletDamage, double bulletSpeed,
 			Sound shotSound, float shotSoundPitch, Sound reloadSound, float reloadSoundPitch, Sound finishReloadSound, float finishReloadPitch){
 		super(plugin, name, material, lore);
+		this.regex = "^"+ChatColor.GRAY+".*<[0-9]+/[0-9]+>";
 
 		this.ammoSize = ammoSize;
-		this.ammoRemain = ammoSize;
 		this.cooltime = cooltime;
 		this.reloadTime = reloadTime;
 
@@ -57,43 +56,17 @@ public class Gun extends GFSItem{
 		this.finishReloadSound = finishReloadSound;
 		this.finishReloadPitch = finishReloadPitch;
 
-		this.name = makeDisplayName(rawName);
+		this.displayName = makeDisplayName(rawName);
 
-		ItemMeta itemMeta = itemStack.getItemMeta();
-		itemMeta.setDisplayName(this.name);
-		itemStack.setItemMeta(itemMeta);
-	}
-
-	public Gun(GunForSurvival plugin, ItemStack itemStack){
-		super(plugin, itemStack);
-
-		ItemMeta itemMeta = itemStack.getItemMeta();
-		String name = itemMeta.getDisplayName();
-		String ammo[] = name.split("<")[1].split("/");
-		ammo[1] = ammo[1].split(">")[0];
-		this.ammoRemain = Integer.parseInt(ammo[0]);
-		this.ammoSize = Integer.parseInt(ammo[1]);
-
-		Gun original = (Gun) this.plugin.itemMap.get(rawName);
-		this.cooltime = original.getCooltime();
-		this.reloadTime = original.getReloadTime();
-
-		this.bulletType = original.getBulletType();
-		this.bulletDamage = original.getBulletDamage();
-		this.bulletSpeed = original.getBulletSpeed();
-
-		this.shotSound = original.getShotSound();
-		this.shotSoundPitch = original.getShotSoundPitch();
-		this.reloadSound = original.getReloadSound();
-		this.reloadSoundPitch = original.getReloadSoundPitch();
-		this.finishReloadSound = original.getFinishReloadSound();
-		this.finishReloadPitch = original.getFinishReloadPitch();
+		ItemMeta itemMeta = orgItemStack.getItemMeta();
+		itemMeta.setDisplayName(this.displayName);
+		orgItemStack.setItemMeta(itemMeta);
 	}
 
 	@Override
 	public String makeDisplayName(String rawName) {
 		// 表示名の設定
-		return ChatColor.GRAY + rawName + " <"+ammoRemain+"/"+ammoSize+">";
+		return ChatColor.GRAY + rawName + " <"+ammoSize+"/"+ammoSize+">";
 	}
 
 	@Override
@@ -102,48 +75,19 @@ public class Gun extends GFSItem{
 		return name.split(ChatColor.GRAY +"")[1].split(" <")[0];
 	}
 
-	public int getCooltime(){
-		return cooltime;
-	}
-	public int getReloadTime(){
-		return reloadTime;
-	}
-	public EntityType getBulletType(){
-		return bulletType;
-	}
-	public double getBulletDamage(){
-		return bulletDamage;
-	}
-	public double getBulletSpeed(){
-		return bulletSpeed;
-	}
-	public Sound getShotSound(){
-		return shotSound;
-	}
-	public float getShotSoundPitch() {
-		return shotSoundPitch;
-	}
-	public Sound getReloadSound() {
-		return reloadSound;
-	}
-	public float getReloadSoundPitch() {
-		return reloadSoundPitch;
-	}
-	public Sound getFinishReloadSound() {
-		return finishReloadSound;
-	}
-	public float getFinishReloadPitch() {
-		return finishReloadPitch;
+	public int getAmmoRemain(String name){
+		// 表示名から残弾数を取得
+		return Integer.parseInt(name.split("<")[1].split("/")[0]);
 	}
 
 	@Override
-	public void playerAction(Player player, String action){
+	public void playerAction(Player player, ItemStack itemStack, String action){
 		if(action.equals("LEFT_CLICK")){
 			zoom(player);
 		}else if(action.equals("RIGHT_CLICK")){
-			shot(player);
+			shot(player, itemStack);
 		}else if(action.equals("SNEAK")){
-			reload(player);
+			reload(player, itemStack);
 		}
 	}
 
@@ -160,15 +104,23 @@ public class Gun extends GFSItem{
 		// 着弾場所に何かしたいならここに書く
 	}
 
-	private void shot(Player player){
+	private void shot(Player player, ItemStack itemStack){
+		ItemMeta itemMeta = itemStack.getItemMeta();
+		String name = itemMeta.getDisplayName();
+		List<String> lore = itemStack.getItemMeta().getLore();
+		int ammoRemain = getAmmoRemain(name);
+
 		if(Pattern.compile("Reload").matcher(name).find()){
-			reload(player);
+			reload(player, itemStack);
 			return;
 		}
+
 		if(lore.size() > 0 && Pattern.compile("CoolTime").matcher(lore.get(lore.size()-1)).find()){
+			System.out.println(player);
 			new CoolTimer(itemStack, player).runTaskLater(this.plugin, cooltime);
 			return;
 		}
+
 		if(ammoRemain > 0){
 			// 銃弾を発射する
 			Location loc = player.getLocation();
@@ -181,7 +133,6 @@ public class Gun extends GFSItem{
 			loc.getWorld().playSound(loc, shotSound, 3, shotSoundPitch);
 
 			ammoRemain--;
-			ItemMeta itemMeta = itemStack.getItemMeta();
 			itemMeta.setDisplayName(itemStack.getItemMeta().getDisplayName().split(" <")[0] + " <"+ammoRemain+"/"+ammoSize+">");
 
 			// loreの最後の行にステータスを記述する
@@ -197,7 +148,7 @@ public class Gun extends GFSItem{
 			new CoolTimer(itemStack, player).runTaskLater(this.plugin, cooltime);
 		}else if(ammoRemain == 0){
 			// 弾切れ
-			reload(player);
+			reload(player, itemStack);
 		}
 	}
 
@@ -215,17 +166,22 @@ public class Gun extends GFSItem{
 		player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 24000, 4));
 	}
 
-	private void reload(Player player){
+	private void reload(Player player, ItemStack itemStack){
+		ItemMeta itemMeta = itemStack.getItemMeta();
+		String name = itemMeta.getDisplayName();
+		List<String> lore = itemStack.getItemMeta().getLore();
+		int ammoRemain = getAmmoRemain(name);
+
 		if(lore.size() > 0 && Pattern.compile("CoolTime").matcher(lore.get(lore.size()-1)).find()){
 			new CoolTimer(itemStack, player).runTaskLater(this.plugin, cooltime);
 			return;
 		}
+
 		if(ammoRemain == ammoSize){
 			return;
 		}
 		ammoRemain = ammoSize;
 		if(!Pattern.compile("Reload").matcher(name).find()){
-			ItemMeta itemMeta = itemStack.getItemMeta();
 			itemMeta.setDisplayName(itemStack.getItemMeta().getDisplayName() + " [Reload]");
 			itemStack.setItemMeta(itemMeta);
 			player.getWorld().playSound(player.getLocation(), reloadSound, 2, reloadSoundPitch);

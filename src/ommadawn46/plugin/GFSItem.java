@@ -1,7 +1,7 @@
 package ommadawn46.plugin;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -10,46 +10,47 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 public abstract class GFSItem{
 	protected GunForSurvival plugin;
+	protected String regex;
 	protected String rawName;
-	protected String name;
+	protected String displayName;
 	protected Material material;
-	protected ItemStack itemStack;
-	protected List<String> lore;
+	protected ItemStack orgItemStack;
+	protected List<String> orgLore;
 
 	public GFSItem(GunForSurvival plugin, String rawName, Material material, List<String> lore){
 		this.plugin = plugin;
+		this.regex = null; // 各アイテムクラスで設定すること
 		this.rawName = rawName;
-		this.name = null; // 各アイテムクラスでmakeDisplayName()を呼び出すこと
+		this.displayName = null; // 各アイテムクラスでmakeDisplayName()を呼び出すこと
 		this.material = material;
-		this.lore = lore;
+		this.orgLore = lore;
 
 		ItemStack itemStack = new ItemStack(material, 1);
 		ItemMeta itemMeta = itemStack.getItemMeta();
-		itemMeta.setLore(this.lore);
+		itemMeta.setLore(this.orgLore);
 		itemStack.setItemMeta(itemMeta);
-		this.itemStack = itemStack;
-	}
-
-	public GFSItem(GunForSurvival plugin, ItemStack itemStack){
-		this.plugin = plugin;
-		this.name = itemStack.getItemMeta().getDisplayName();
-		this.rawName = getRawNameFromDisplayName(name);
-		this.material = itemStack.getType();
-		this.itemStack = itemStack;
-
-		if(itemStack.getItemMeta().hasLore()){
-			this.lore = itemStack.getItemMeta().getLore();
-		}else{
-			this.lore = new ArrayList<String>();
-		}
+		this.orgItemStack = itemStack;
 	}
 
 	public ItemStack getItemStack(){
-		return itemStack.clone();
+		return orgItemStack.clone();
 	}
 
 	public String getRawName(){
 		return rawName;
+	}
+
+	// このインスタンスから生成されたアイテムかどうかを調べる
+	public boolean isThisItem(ItemStack itemStack){
+		String name = itemStack.getItemMeta().getDisplayName();
+		Material material = itemStack.getType();
+		if(Pattern.compile(regex).matcher(name).find() && this.material.equals(material)){
+			String rawName = getRawNameFromDisplayName(name);
+			if(this.rawName.equals(rawName)){
+				return true;
+			}
+		}
+		return false;
 	}
 
 	// アイテムの表示名を作成
@@ -59,5 +60,5 @@ public abstract class GFSItem{
 	public abstract String getRawNameFromDisplayName(String name);
 
 	// アクションの指定
-	public abstract void playerAction(Player player, String action);
+	public abstract void playerAction(Player player, ItemStack itemStack, String action);
 }

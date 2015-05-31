@@ -12,6 +12,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.ItemStack;
@@ -39,7 +40,7 @@ public class GFSListener implements Listener{
 			ItemStack itemStack = player.getItemInHand();
 			GFSItem item = this.plugin.getItem(itemStack);
 			if(item != null){
-				item.playerAction(player, click);
+				item.playerAction(player, itemStack, click);
 			}
 		}
 	}
@@ -50,7 +51,7 @@ public class GFSListener implements Listener{
 		ItemStack itemStack = player.getItemInHand();
 		GFSItem item = this.plugin.getItem(itemStack);
 		if(item != null && e.isSneaking()){
-			item.playerAction(player, "SNEAK");
+			item.playerAction(player, itemStack, "SNEAK");
 		}
 	}
 
@@ -58,7 +59,7 @@ public class GFSListener implements Listener{
 	public void onPlayerItemHeldEvent(PlayerItemHeldEvent e){
 		ItemStack itemStack = e.getPlayer().getInventory().getItem(e.getPreviousSlot());
 		GFSItem item = this.plugin.getItem(itemStack);
-		if(item != null && item instanceof Gun){
+		if(item != null && (item instanceof Gun || item instanceof TeleportGun)){
 			ItemMeta itemMeta = itemStack.getItemMeta();
 			String name = itemMeta.getDisplayName();
 			if(Pattern.compile("Reload").matcher(name).find()){
@@ -73,7 +74,7 @@ public class GFSListener implements Listener{
 	public void onPlayerDropItemEvent(PlayerDropItemEvent e){
 		ItemStack itemStack = e.getItemDrop().getItemStack();
 		GFSItem item = this.plugin.getItem(itemStack);
-		if(item != null && item instanceof Gun){
+		if(item != null && (item instanceof Gun || item instanceof TeleportGun)){
 			ItemMeta itemMeta = itemStack.getItemMeta();
 			String name = itemMeta.getDisplayName();
 			if(Pattern.compile("Reload").matcher(name).find()){
@@ -114,6 +115,15 @@ public class GFSListener implements Listener{
 					e.setDamage(0);
 				}
 			}
+		}
+	}
+
+	@EventHandler
+	public void onPlayerItemConsumeEvent(PlayerItemConsumeEvent e){
+		ItemStack itemStack = e.getItem();
+		GFSItem item = this.plugin.getItem(itemStack);
+		if(item instanceof FlyingPotion){
+			item.playerAction(e.getPlayer(), itemStack, "CONSUME");
 		}
 	}
 

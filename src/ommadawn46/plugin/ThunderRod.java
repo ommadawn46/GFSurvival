@@ -18,23 +18,16 @@ public class ThunderRod extends GFSItem{
 
 	public ThunderRod(GunForSurvival plugin, String rawName, Material material, List<String> lore, int cooltime, int range){
 		super(plugin, rawName, material, lore);
+		this.regex = "^"+ChatColor.GOLD;
 
 		this.cooltime = cooltime;
 		this.range = range;
 
-		this.name = makeDisplayName(rawName);
+		this.displayName = makeDisplayName(rawName);
 
-		ItemMeta itemMeta = itemStack.getItemMeta();
-		itemMeta.setDisplayName(this.name);
-		itemStack.setItemMeta(itemMeta);
-	}
-
-	public ThunderRod(GunForSurvival plugin, ItemStack itemStack) {
-		super(plugin, itemStack);
-
-		ThunderRod original = (ThunderRod) this.plugin.itemMap.get(rawName);
-		this.cooltime = original.getCooltime();
-		this.range = original.getRange();
+		ItemMeta itemMeta = orgItemStack.getItemMeta();
+		itemMeta.setDisplayName(this.displayName);
+		orgItemStack.setItemMeta(itemMeta);
 	}
 
 	@Override
@@ -49,21 +42,16 @@ public class ThunderRod extends GFSItem{
 		return name.split(ChatColor.GOLD +"")[1];
 	}
 
-	public int getCooltime(){
-		return cooltime;
-	}
-	private int getRange() {
-		return range;
-	}
-
 	@Override
-	public void playerAction(Player player, String action) {
+	public void playerAction(Player player, ItemStack itemStack, String action) {
 		if(action.equals("LEFT_CLICK")){
-			shot(player);
+			shot(player, itemStack);
 		}
 	}
 
-	private void shot(Player player){
+	private void shot(Player player, ItemStack itemStack){
+		List<String> lore = itemStack.getItemMeta().getLore();
+
 		if(lore.size() > 0 && Pattern.compile("CoolTime").matcher(lore.get(lore.size()-1)).find()){
 			new CoolTimer(itemStack, player).runTaskLater(this.plugin, cooltime);
 			return;
