@@ -12,6 +12,7 @@ import java.util.Map;
 import ommadawn46.gunForSurvival.items.FlyingPotion;
 import ommadawn46.gunForSurvival.items.GFSItem;
 import ommadawn46.gunForSurvival.items.Gun;
+import ommadawn46.gunForSurvival.items.JetBoots;
 import ommadawn46.gunForSurvival.items.TeleportGun;
 import ommadawn46.gunForSurvival.items.ThunderRod;
 
@@ -134,6 +135,9 @@ public class GunForSurvival extends JavaPlugin{
 	    			}else if(itemType.equals("FlyingPotion")){
 	    				// 飛行ポーション
 	    				itemMap.put(name, new FlyingPotion(this, itemInfo));
+	    			}else if(itemType.equals("JetBoots")){
+	    				// ジェットブーツ
+	    				itemMap.put(name, new JetBoots(this, itemInfo));
 	    			}else{
 	    				throw new Exception();
 	    			}

@@ -70,3 +70,18 @@ FlyingPotion:
   Duration: "100"
   ConsumeSound: ENDERMAN_TELEPORT
   ConsumeSoundPitch: '1.5'
+
+JetBoots:
+- Name: JetBoots
+  Material: GOLD_BOOTS
+  Lore:
+  - This is a JetBoots
+  - Jet Boots
+  Cooltime: '20'
+  HopUp: '0.5'
+  HorizontalAccel: '8.0'
+  UpAccel: '1.5'
+  DownAccel: '1.5'
+  NoFallingDamage: true
+  JetSound: IRONGOLEM_HIT
+  JetSoundPitch: '1.8'

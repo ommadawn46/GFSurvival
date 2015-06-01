@@ -2,9 +2,9 @@ package ommadawn46.gunForSurvival;
 
 import java.util.regex.Pattern;
 
-import ommadawn46.gunForSurvival.items.FlyingPotion;
 import ommadawn46.gunForSurvival.items.GFSItem;
 import ommadawn46.gunForSurvival.items.Gun;
+import ommadawn46.gunForSurvival.items.JetBoots;
 import ommadawn46.gunForSurvival.items.TeleportGun;
 import ommadawn46.gunForSurvival.items.ThunderRod;
 
@@ -15,12 +15,15 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.event.player.PlayerToggleSprintEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -52,12 +55,31 @@ public class GFSListener implements Listener{
 	}
 
 	@EventHandler
+	public void onPlayerToggleSprintEvent(PlayerToggleSprintEvent e){
+		Player player = e.getPlayer();
+		ItemStack boots = player.getInventory().getArmorContents()[0];
+		GFSItem item = this.plugin.getItem(boots);
+		if(item != null && e.isSprinting()){
+			item.playerAction(player, boots, "SPLINT");
+		}
+	}
+
+	@EventHandler
 	public void onPlayerToggleSneakEvent(PlayerToggleSneakEvent e){
 		Player player = e.getPlayer();
 		ItemStack itemStack = player.getItemInHand();
 		GFSItem item = this.plugin.getItem(itemStack);
 		if(item != null && e.isSneaking()){
 			item.playerAction(player, itemStack, "SNEAK");
+		}
+	}
+
+	@EventHandler
+	public void onPlayerItemConsumeEvent(PlayerItemConsumeEvent e){
+		ItemStack itemStack = e.getItem();
+		GFSItem item = this.plugin.getItem(itemStack);
+		if(item != null){
+			item.playerAction(e.getPlayer(), itemStack, "CONSUME");
 		}
 	}
 
@@ -118,18 +140,23 @@ public class GFSListener implements Listener{
 				GFSItem item = this.plugin.getItem(itemStack);
 				if(item instanceof ThunderRod){
 					// プレイヤーが雷の杖を持っているときはダメージを無効化
-					e.setDamage(0);
+					e.setCancelled(true);
 				}
 			}
 		}
 	}
 
 	@EventHandler
-	public void onPlayerItemConsumeEvent(PlayerItemConsumeEvent e){
-		ItemStack itemStack = e.getItem();
-		GFSItem item = this.plugin.getItem(itemStack);
-		if(item instanceof FlyingPotion){
-			item.playerAction(e.getPlayer(), itemStack, "CONSUME");
+	public void onEntityDamageEvent(EntityDamageEvent e){
+		if(e.getCause().equals(DamageCause.FALL)){
+			if(e.getEntity() instanceof Player){
+				Player player = (Player) e.getEntity();
+				ItemStack boots = player.getInventory().getBoots();
+				GFSItem item = this.plugin.getItem(boots);
+				if(item instanceof JetBoots && ((JetBoots)item).isNoFallingDamage()){
+					e.setCancelled(true);
+				}
+			}
 		}
 	}
 
