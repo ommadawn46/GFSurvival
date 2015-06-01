@@ -21,6 +21,7 @@ public class JetBoots extends GFSItem{
 	private double horizontalAccel;
 	private double upAccel;
 	private double downAccel;
+	private double jump;
 	private boolean noFallingDamage;
 	private Sound jetSound;
 	private float jetSoundPitch;
@@ -35,6 +36,7 @@ public class JetBoots extends GFSItem{
 		this.horizontalAccel = Double.parseDouble((String) itemInfo.get("HorizontalAccel"));
 		this.upAccel = Double.parseDouble((String) itemInfo.get("UpAccel"));
 		this.downAccel = Double.parseDouble((String) itemInfo.get("DownAccel"));
+		this.jump = Double.parseDouble((String) itemInfo.get("Jump"));
 
 		this.noFallingDamage = (boolean)itemInfo.get("NoFallingDamage");
 
@@ -56,6 +58,8 @@ public class JetBoots extends GFSItem{
 	public void playerAction(Player player, ItemStack itemStack, String action) {
 		if(action.equals("SPLINT")){
 			accel(player, itemStack);
+		}else if(action.equals("SNEAK")){
+			jump(player, itemStack);
 		}
 	}
 
@@ -77,6 +81,33 @@ public class JetBoots extends GFSItem{
 		}else{
 			vector.setY(hopUp + vector.getY() * downAccel);
 		}
+		player.setFallDistance(0);
+		player.setVelocity(vector);
+
+		player.getWorld().playSound(player.getLocation(), jetSound, 3, jetSoundPitch);
+
+		// loreの最後の行にステータスを記述する
+		lore.add("<CoolTime>");
+		itemMeta.setLore(lore);
+
+		itemStack.setItemMeta(itemMeta);
+
+		new BootsCoolTimer(itemStack, player).runTaskLater(this.plugin, coolTime);
+	}
+
+	private void jump(Player player, ItemStack itemStack){
+		ItemMeta itemMeta = itemStack.getItemMeta();
+		List<String> lore = itemStack.getItemMeta().getLore();
+
+		if(lore.size() > 0 && Pattern.compile("CoolTime").matcher(lore.get(lore.size()-1)).find()){
+			new BootsCoolTimer(itemStack, player).runTaskLater(this.plugin, coolTime);
+			return;
+		}
+
+		// プレイヤーを上方向に加速させる
+		Vector vector = player.getVelocity();
+		vector.setY(jump);
+
 		player.setFallDistance(0);
 		player.setVelocity(vector);
 

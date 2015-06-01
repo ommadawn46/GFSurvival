@@ -72,6 +72,12 @@ public class GFSListener implements Listener{
 		if(item != null && e.isSneaking()){
 			item.playerAction(player, itemStack, "SNEAK");
 		}
+
+		ItemStack boots = player.getInventory().getBoots();
+		item = this.plugin.getItem(boots);
+		if(item != null && e.isSneaking()){
+			item.playerAction(player, boots, "SNEAK");
+		}
 	}
 
 	@EventHandler
