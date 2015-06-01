@@ -1,6 +1,12 @@
-package ommadawn46.plugin;
+package ommadawn46.gunForSurvival;
 
 import java.util.regex.Pattern;
+
+import ommadawn46.gunForSurvival.items.FlyingPotion;
+import ommadawn46.gunForSurvival.items.GFSItem;
+import ommadawn46.gunForSurvival.items.Gun;
+import ommadawn46.gunForSurvival.items.TeleportGun;
+import ommadawn46.gunForSurvival.items.ThunderRod;
 
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;

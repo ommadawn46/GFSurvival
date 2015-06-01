@@ -1,7 +1,11 @@
-package ommadawn46.plugin;
+package ommadawn46.gunForSurvival.items;
 
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
+
+import ommadawn46.gunForSurvival.CoolTimer;
+import ommadawn46.gunForSurvival.GunForSurvival;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -16,30 +20,18 @@ public class ThunderRod extends GFSItem{
 	private int cooltime;
 	private int range;
 
-	public ThunderRod(GunForSurvival plugin, String rawName, Material material, List<String> lore, int cooltime, int range){
-		super(plugin, rawName, material, lore);
-		this.regex = "^"+ChatColor.GOLD;
+	public ThunderRod(GunForSurvival plugin, Map<?, ?> itemInfo){
+		super(plugin, itemInfo);
+		this.identifier = ChatColor.GOLD + "" + ChatColor.RESET;
 
-		this.cooltime = cooltime;
-		this.range = range;
+		this.cooltime = Integer.parseInt((String) itemInfo.get("Cooltime"));
+		this.range = Integer.parseInt((String) itemInfo.get("Range"));
 
 		this.displayName = makeDisplayName(rawName);
 
 		ItemMeta itemMeta = orgItemStack.getItemMeta();
 		itemMeta.setDisplayName(this.displayName);
 		orgItemStack.setItemMeta(itemMeta);
-	}
-
-	@Override
-	public String makeDisplayName(String rawName) {
-		// 表示名の設定
-		return ChatColor.GOLD + rawName;
-	}
-
-	@Override
-	public String getRawNameFromDisplayName(String name) {
-		// 表示名から本来の名前を取得
-		return name.split(ChatColor.GOLD +"")[1];
 	}
 
 	@Override

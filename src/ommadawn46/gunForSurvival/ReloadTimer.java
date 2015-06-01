@@ -1,4 +1,4 @@
-package ommadawn46.plugin;
+package ommadawn46.gunForSurvival;
 
 import java.util.List;
 import java.util.regex.Pattern;

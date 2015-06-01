@@ -1,7 +1,10 @@
-package ommadawn46.plugin;
+package ommadawn46.gunForSurvival.items;
 
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
+
+import ommadawn46.gunForSurvival.GunForSurvival;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -10,20 +13,21 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 public abstract class GFSItem{
 	protected GunForSurvival plugin;
-	protected String regex;
+	protected String identifier;
 	protected String rawName;
 	protected String displayName;
 	protected Material material;
 	protected ItemStack orgItemStack;
 	protected List<String> orgLore;
 
-	public GFSItem(GunForSurvival plugin, String rawName, Material material, List<String> lore){
+	@SuppressWarnings("unchecked")
+	public GFSItem(GunForSurvival plugin, Map<?, ?> itemInfo){
 		this.plugin = plugin;
-		this.regex = null; // 各アイテムクラスで設定すること
-		this.rawName = rawName;
+		this.identifier = null; // chatColorでクラスの識別をする。各アイテムクラスで設定すること
+		this.rawName = (String) itemInfo.get("Name");
 		this.displayName = null; // 各アイテムクラスでmakeDisplayName()を呼び出すこと
-		this.material = material;
-		this.orgLore = lore;
+		this.material = Material.valueOf((String)itemInfo.get("Material"));
+		this.orgLore = (List<String>) itemInfo.get("Lore");
 
 		ItemStack itemStack = new ItemStack(material, 1);
 		ItemMeta itemMeta = itemStack.getItemMeta();
@@ -44,20 +48,23 @@ public abstract class GFSItem{
 	public boolean isThisItem(ItemStack itemStack){
 		String name = itemStack.getItemMeta().getDisplayName();
 		Material material = itemStack.getType();
-		if(Pattern.compile(regex).matcher(name).find() && this.material.equals(material)){
-			String rawName = getRawNameFromDisplayName(name);
-			if(this.rawName.equals(rawName)){
-				return true;
-			}
+		if(Pattern.compile(identifier + rawName).matcher(name).find() && this.material.equals(material)){
+			return true;
 		}
 		return false;
 	}
 
 	// アイテムの表示名を作成
-	public abstract String makeDisplayName(String rawName);
+	protected String makeDisplayName(String rawName){
+		// 表示名の設定
+		return identifier + rawName;
+	}
 
 	// アイテムの本来の名前を取得
-	public abstract String getRawNameFromDisplayName(String name);
+	protected String getRawNameFromDisplayName(String name) {
+		// 表示名から本来の名前を取得
+		return name.split(identifier)[1];
+	}
 
 	// アクションの指定
 	public abstract void playerAction(Player player, ItemStack itemStack, String action);

@@ -1,24 +1,27 @@
-package ommadawn46.plugin;
+package ommadawn46.gunForSurvival;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ommadawn46.gunForSurvival.items.FlyingPotion;
+import ommadawn46.gunForSurvival.items.GFSItem;
+import ommadawn46.gunForSurvival.items.Gun;
+import ommadawn46.gunForSurvival.items.TeleportGun;
+import ommadawn46.gunForSurvival.items.ThunderRod;
+
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -65,7 +68,21 @@ public class GunForSurvival extends JavaPlugin{
     		}
 
     		return true;
+    	}else if(cmd.getName().equalsIgnoreCase("gfslist")){
+    		if(args.length != 0){
+    			return false;
+    		}
+
+    		// アイテムのリストを表示
+    		sender.sendMessage(ChatColor.YELLOW + "------GFS Items------");
+    		for(String key: itemMap.keySet()){
+        		sender.sendMessage("  " + key);
+    		}
+    		sender.sendMessage(ChatColor.YELLOW + "---------------------");
+
+    		return true;
     	}
+
     	return false;
     }
 
@@ -100,79 +117,29 @@ public class GunForSurvival extends JavaPlugin{
 
 		}
 
-    	// アイテムの種類を設定する
-    	List<String> itemTypes = new ArrayList<String>();
-    	itemTypes.add("Gun");
-    	itemTypes.add("TeleportGun");
-    	itemTypes.add("ThunderRod");
-    	itemTypes.add("FlyingPotion");
-
-    	for(String itemType: itemTypes){
+    	for(String itemType: itemData.getKeys(false)){
     		List<Map<?, ?>> itemList = itemData.getMapList(itemType);
     		for(Map<?, ?> itemInfo: itemList){
     			String name = (String) itemInfo.get("Name");
-    			Material material = Material.valueOf((String)itemInfo.get("Material"));
-
-    			@SuppressWarnings("unchecked")
-    			List<String> lore = (List<String>) itemInfo.get("Lore");
-
-    			if(itemType.equals("Gun")){
-
-    				// 銃
-    				int ammoSize = Integer.parseInt((String) itemInfo.get("AmmoSize"));
-    				int cooltime = Integer.parseInt((String) itemInfo.get("Cooltime"));
-    				int reloadtime = Integer.parseInt((String) itemInfo.get("Reloadtime"));
-
-    				EntityType bulletType = EntityType.valueOf((String)itemInfo.get("BulletType"));
-    				double bulletDamage = Double.parseDouble((String) itemInfo.get("BulletDamage"));
-    				double bulletSpeed = Double.parseDouble((String) itemInfo.get("BulletSpeed"));
-
-    				Sound shotSound = Sound.valueOf((String)itemInfo.get("ShotSound"));
-    				float shotSoundPitch = Float.parseFloat((String)itemInfo.get("ShotSoundPitch"));
-    				Sound reloadSound = Sound.valueOf((String)itemInfo.get("ReloadSound"));
-    				float reloadSoundPitch = Float.parseFloat((String)itemInfo.get("ReloadSoundPitch"));
-    				Sound finishReloadSound = Sound.valueOf((String)itemInfo.get("FinishReloadSound"));
-    				float finishReloadSoundPitch = Float.parseFloat((String)itemInfo.get("FinishReloadSoundPitch"));
-
-    				itemMap.put(name, new Gun(this, name, material, lore, ammoSize, cooltime, reloadtime,
-    						bulletType, bulletDamage, bulletSpeed,
-    						shotSound, shotSoundPitch, reloadSound, reloadSoundPitch, finishReloadSound, finishReloadSoundPitch));
-
-    			}else if(itemType.equals("TeleportGun")){
-
-    				// テレポート銃
-    				int ammoSize = Integer.parseInt((String) itemInfo.get("AmmoSize"));
-    				int cooltime = Integer.parseInt((String) itemInfo.get("Cooltime"));
-    				int reloadtime = Integer.parseInt((String) itemInfo.get("Reloadtime"));
-    				int range = Integer.parseInt((String) itemInfo.get("Range"));
-
-    				Sound shotSound = Sound.valueOf((String)itemInfo.get("ShotSound"));
-    				float shotSoundPitch = Float.parseFloat((String)itemInfo.get("ShotSoundPitch"));
-    				Sound reloadSound = Sound.valueOf((String)itemInfo.get("ReloadSound"));
-    				float reloadSoundPitch = Float.parseFloat((String)itemInfo.get("ReloadSoundPitch"));
-    				Sound finishReloadSound = Sound.valueOf((String)itemInfo.get("FinishReloadSound"));
-    				float finishReloadSoundPitch = Float.parseFloat((String)itemInfo.get("FinishReloadSoundPitch"));
-
-    				itemMap.put(name, new TeleportGun(this, name, material, lore, ammoSize, cooltime, reloadtime, range,
-    						shotSound, shotSoundPitch, reloadSound, reloadSoundPitch, finishReloadSound, finishReloadSoundPitch));
-
-    			}else if(itemType.equals("ThunderRod")){
-
-    				// 雷の杖
-    				int cooltime = Integer.parseInt((String) itemInfo.get("Cooltime"));
-    				int range = Integer.parseInt((String) itemInfo.get("Range"));
-
-    				itemMap.put(name, new ThunderRod(this, name, material, lore, cooltime, range));
-
-    			}else if(itemType.equals("FlyingPotion")){
-
-    				// 飛行ポーション
-    				int duration = Integer.parseInt((String) itemInfo.get("Duration"));
-    				Sound consumeSound = Sound.valueOf((String)itemInfo.get("ConsumeSound"));
-    				float consumeSoundPitch = Float.parseFloat((String)itemInfo.get("ConsumeSoundPitch"));
-
-    				itemMap.put(name, new FlyingPotion(this, name, material, lore, duration, consumeSound, consumeSoundPitch));
-
+    			try{
+	    			if(itemType.equals("Gun")){
+	    				// 銃
+	    				itemMap.put(name, new Gun(this, itemInfo));
+	    			}else if(itemType.equals("TeleportGun")){
+	    				// テレポート銃
+	    				itemMap.put(name, new TeleportGun(this, itemInfo));
+	    			}else if(itemType.equals("ThunderRod")){
+	    				// 雷の杖
+	    				itemMap.put(name, new ThunderRod(this, itemInfo));
+	    			}else if(itemType.equals("FlyingPotion")){
+	    				// 飛行ポーション
+	    				itemMap.put(name, new FlyingPotion(this, itemInfo));
+	    			}else{
+	    				throw new Exception();
+	    			}
+    			}catch(Exception e){
+    				System.out.println("!Load Error <" + itemType + ": " + name + ">");
+    				continue;
     			}
     			System.out.println(itemType + ": " + name + " is Loaded");
     		}
@@ -205,8 +172,7 @@ public class GunForSurvival extends JavaPlugin{
     	}
 
     	// ItemStackの情報をもとにitemMapの中から該当するアイテムを探す
-    	for(Map.Entry<String, GFSItem> itemEntry: itemMap.entrySet()){
-    		GFSItem item = itemEntry.getValue();
+    	for(GFSItem item: itemMap.values()){
     		if(item.isThisItem(itemStack)){
     			return item;
     		}

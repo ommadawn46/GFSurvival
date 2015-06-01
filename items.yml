@@ -17,7 +17,7 @@ Gun:
   FinishReloadSound: ANVIL_LAND
   FinishReloadSoundPitch: '2.0'
 
-- Name: RocketLunchar
+- Name: RocketLauncher
   Material: GOLD_INGOT
   Lore:
   - This is a Gun.

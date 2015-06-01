@@ -1,9 +1,10 @@
-package ommadawn46.plugin;
+package ommadawn46.gunForSurvival.items;
 
-import java.util.List;
+import java.util.Map;
+
+import ommadawn46.gunForSurvival.GunForSurvival;
 
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -16,32 +17,19 @@ public class FlyingPotion extends GFSItem {
 	private Sound consumeSound;
 	private float consumeSoundPitch;
 
-	public FlyingPotion(GunForSurvival plugin, String rawName,
-			Material material, List<String> lore, int duration, Sound consumeSound, float consumeSoundPitch) {
-		super(plugin, rawName, material, lore);
-		this.regex = "^"+ChatColor.BLUE;
+	public FlyingPotion(GunForSurvival plugin, Map<?, ?> itemInfo) {
+		super(plugin, itemInfo);
+		this.identifier = ChatColor.BLUE + "" + ChatColor.RESET;
 
-		this.duration = duration;
-		this.consumeSound = consumeSound;
-		this.consumeSoundPitch = consumeSoundPitch;
+		this.duration = Integer.parseInt((String) itemInfo.get("Duration"));
+		this.consumeSound = Sound.valueOf((String)itemInfo.get("ConsumeSound"));
+		this.consumeSoundPitch = Float.parseFloat((String)itemInfo.get("ConsumeSoundPitch"));
 
 		this.displayName = makeDisplayName(rawName);
 
 		ItemMeta itemMeta = orgItemStack.getItemMeta();
 		itemMeta.setDisplayName(this.displayName);
 		orgItemStack.setItemMeta(itemMeta);
-	}
-
-	@Override
-	public String makeDisplayName(String rawName) {
-		// 表示名の設定
-		return ChatColor.BLUE + rawName;
-	}
-
-	@Override
-	public String getRawNameFromDisplayName(String name) {
-		// 表示名から本来の名前を取得
-		return name.split(ChatColor.BLUE +"")[1];
 	}
 
 	@Override
