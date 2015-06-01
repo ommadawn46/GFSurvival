@@ -21,6 +21,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 public class Gun extends GFSItem{
@@ -31,6 +32,9 @@ public class Gun extends GFSItem{
 	private EntityType bulletType;
 	private double bulletDamage;
 	private double bulletSpeed;
+
+	private int burstShot;
+	private int burstInterval;
 
 	private Sound shotSound;
 	private float shotSoundPitch;
@@ -50,6 +54,9 @@ public class Gun extends GFSItem{
 		this.bulletType = EntityType.valueOf((String)itemInfo.get("BulletType"));
 		this.bulletDamage = Double.parseDouble((String) itemInfo.get("BulletDamage"));
 		this.bulletSpeed = Double.parseDouble((String) itemInfo.get("BulletSpeed"));
+
+		this.burstShot =  Integer.parseInt((String) itemInfo.get("BurstShot"));
+		this.burstInterval = Integer.parseInt((String) itemInfo.get("BurstInterval"));
 
 		this.shotSound = Sound.valueOf((String)itemInfo.get("ShotSound"));
 		this.shotSoundPitch = Float.parseFloat((String)itemInfo.get("ShotSoundPitch"));
@@ -87,6 +94,7 @@ public class Gun extends GFSItem{
 		if(action.equals("LEFT_CLICK")){
 			zoom(player);
 		}else if(action.equals("RIGHT_CLICK")){
+			// 右クリック長押し中は0.2秒毎に呼ばれる
 			shot(player, itemStack);
 		}else if(action.equals("SNEAK")){
 			reload(player, itemStack);
@@ -113,7 +121,7 @@ public class Gun extends GFSItem{
 		int ammoRemain = getAmmoRemain(name);
 
 		if(Pattern.compile("Reload").matcher(name).find()){
-			reload(player, itemStack);
+			//reload(player, itemStack);
 			return;
 		}
 
@@ -125,22 +133,13 @@ public class Gun extends GFSItem{
 		if(ammoRemain > 0){
 			Location loc = player.getEyeLocation();
 			Vector vec = new Vector(loc.getDirection().getX()*bulletSpeed ,loc.getDirection().getY()*bulletSpeed ,loc.getDirection().getZ()*bulletSpeed);
+			int useBullet = burstShot < ammoRemain ? burstShot : ammoRemain;
 
-			// 弾の種類がProjectileのサブクラスかどうか
-			if(Projectile.class.isAssignableFrom(bulletType.getEntityClass())){
-				// ProjectileならlaunchProjectileメソッドを使用する
-				Projectile proj = player.launchProjectile(bulletType.getEntityClass().asSubclass(Projectile.class));
-				proj.setVelocity(vec);
-			}else{
-				// その他のEntity
-				Entity bullet = player.getWorld().spawnEntity(loc.add(loc.getDirection().getX()*1.5, loc.getDirection().getY()*1.5, loc.getDirection().getZ()*1.5), bulletType);
-				bullet.setVelocity(vec);
+			// ShotTimerのセット
+			for(int i = 0; i < useBullet; i++){
+				ammoRemain--;
+				new ShotTimer(itemStack, player, vec, bulletType, ammoRemain, ammoSize).runTaskLater(plugin, burstInterval*i);
 			}
-
-			loc.getWorld().playSound(loc, shotSound, 3, shotSoundPitch);
-
-			ammoRemain--;
-			itemMeta.setDisplayName(itemStack.getItemMeta().getDisplayName().split(" <")[0] + " <"+ammoRemain+"/"+ammoSize+">");
 
 			// loreの最後の行にステータスを記述する
 			if(Pattern.compile("Reloaded").matcher(lore.get(lore.size()-1)).find()){
@@ -188,12 +187,65 @@ public class Gun extends GFSItem{
 			return;
 		}
 		ammoRemain = ammoSize;
-		if(!Pattern.compile("Reload").matcher(name).find()){
-			itemMeta.setDisplayName(itemStack.getItemMeta().getDisplayName() + " [Reload]");
-			itemStack.setItemMeta(itemMeta);
-			player.getWorld().playSound(player.getLocation(), reloadSound, 2, reloadSoundPitch);
+
+		if(Pattern.compile("Reload").matcher(name).find()){
+			return;
 		}
+
+		itemMeta.setDisplayName(itemStack.getItemMeta().getDisplayName() + " [Reload]");
+		itemStack.setItemMeta(itemMeta);
+		player.getWorld().playSound(player.getLocation(), reloadSound, 2, reloadSoundPitch);
+
 		new ReloadTimer(itemStack, player, itemStack.getItemMeta().getDisplayName().split(" <")[0] + " <"+ammoRemain+"/"+ammoSize+">",
 				finishReloadSound, finishReloadSoundPitch).runTaskLater(this.plugin, reloadTime);
+	}
+
+	private class ShotTimer extends BukkitRunnable{
+		private ItemStack itemStack;
+		private Player player;
+		private Location loc;
+		private Vector vec;
+		private EntityType bulletType;
+		private boolean bulletIsProjectile;
+		private int ammoRemain;
+		private int ammoSize;
+
+		public ShotTimer(ItemStack itemStack, Player player, Vector vec, EntityType bulletType, int ammoRemain, int ammoSize){
+			this.itemStack = itemStack;
+			this.player = player;
+			this.loc = player.getEyeLocation();
+			this.vec = vec;
+			this.bulletType = bulletType;
+			this.bulletIsProjectile = Projectile.class.isAssignableFrom(this.bulletType.getEntityClass()); // 弾がProjectileのサブクラスかどうか
+			this.ammoRemain = ammoRemain;
+			this.ammoSize = ammoSize;
+		}
+
+		@Override
+		public void run(){
+			ItemStack playerItem = player.getItemInHand();
+	    	if(playerItem == null){
+	    		return;
+	    	}
+	    	if(!playerItem.hasItemMeta()){
+	    		return;
+	    	}
+	    	ItemMeta itemMeta = itemStack.getItemMeta();
+		    if(playerItem.getItemMeta().getDisplayName().equals(itemMeta.getDisplayName())){
+				// 弾の発射
+				if(bulletIsProjectile){
+					Projectile proj = player.launchProjectile(bulletType.getEntityClass().asSubclass(Projectile.class));
+					proj.setVelocity(vec);
+				}else{
+					Entity bullet = player.getWorld().spawnEntity(loc.add(loc.getDirection().getX()*1.5, loc.getDirection().getY()*1.5, loc.getDirection().getZ()*1.5), bulletType);
+					bullet.setVelocity(vec);
+				}
+				loc.getWorld().playSound(loc, shotSound, 3, shotSoundPitch);
+
+				itemMeta.setDisplayName(itemStack.getItemMeta().getDisplayName().split(" <")[0] + " <"+ammoRemain+"/"+ammoSize+">");
+				itemStack.setItemMeta(itemMeta);
+				player.setItemInHand(itemStack);
+	    	}
+		}
 	}
 }

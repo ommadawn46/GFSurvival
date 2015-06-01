@@ -1,15 +1,37 @@
 Gun:
-- Name: Gun
+- Name: Rifle
+  Material: CLAY_BRICK
+  Lore:
+  - This is a Gun.
+  - Rifle
+  AmmoSize: '15'
+  Cooltime: '20'
+  Reloadtime: '80'
+  BulletType: SNOWBALL
+  BulletDamage: '5.0'
+  BulletSpeed: '4.0'
+  BurstShot: '1'
+  BurstInterval: '0'
+  ShotSound: BLAZE_HIT
+  ShotSoundPitch: '0.8'
+  ReloadSound: ANVIL_USE
+  ReloadSoundPitch: '1.5'
+  FinishReloadSound: ANVIL_LAND
+  FinishReloadSoundPitch: '1.5'
+
+- Name: MachineGun
   Material: IRON_INGOT
   Lore:
   - This is a Gun.
-  - Gun
-  AmmoSize: '30'
+  - Machine Gun
+  AmmoSize: '50'
   Cooltime: '3'
   Reloadtime: '50'
   BulletType: SNOWBALL
   BulletDamage: '2.0'
-  BulletSpeed: '4.0'
+  BulletSpeed: '3.5'
+  BurstShot: '2'
+  BurstInterval: '3'
   ShotSound: BLAZE_HIT
   ShotSoundPitch: '2.0'
   ReloadSound: ANVIL_USE
@@ -23,11 +45,13 @@ Gun:
   - This is a Gun.
   - Rocket Launcher
   AmmoSize: '5'
-  Cooltime: '16'
-  Reloadtime: '80'
+  Cooltime: '30'
+  Reloadtime: '100'
   BulletType: FIREBALL
   BulletDamage: '10.0'
   BulletSpeed: '3.0'
+  BurstShot: '1'
+  BurstInterval: '3'
   ShotSound: BLAZE_HIT
   ShotSoundPitch: '1.0'
   ReloadSound: ANVIL_USE
@@ -44,7 +68,7 @@ TeleportGun:
   AmmoSize: '3'
   Cooltime: '20'
   Reloadtime: '100'
-  Range: '500'
+  Range: '200'
   ShotSound: ENDERMAN_TELEPORT
   ShotSoundPitch: '1.0'
   ReloadSound: SLIME_WALK
@@ -82,7 +106,7 @@ JetBoots:
   HorizontalAccel: '8.0'
   UpAccel: '1.5'
   DownAccel: '1.5'
-  Jump: '2.0'
+  Jump: '0.0'
   NoFallingDamage: true
   JetSound: IRONGOLEM_HIT
   JetSoundPitch: '1.8'

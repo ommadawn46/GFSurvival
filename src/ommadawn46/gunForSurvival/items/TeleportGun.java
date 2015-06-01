@@ -80,6 +80,7 @@ public class TeleportGun extends GFSItem{
 		if(action.equals("LEFT_CLICK")){
 			zoom(player);
 		}else if(action.equals("RIGHT_CLICK")){
+			// 右クリック長押し中は0.2秒毎に呼ばれる
 			shot(player, itemStack);
 		}else if(action.equals("SNEAK")){
 			reload(player, itemStack);

@@ -8,6 +8,7 @@ import ommadawn46.gunForSurvival.items.JetBoots;
 import ommadawn46.gunForSurvival.items.TeleportGun;
 import ommadawn46.gunForSurvival.items.ThunderRod;
 
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -17,7 +18,9 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
@@ -92,30 +95,27 @@ public class GFSListener implements Listener{
 	@EventHandler
 	public void onPlayerItemHeldEvent(PlayerItemHeldEvent e){
 		ItemStack itemStack = e.getPlayer().getInventory().getItem(e.getPreviousSlot());
-		GFSItem item = this.plugin.getItem(itemStack);
-		if(item != null && (item instanceof Gun || item instanceof TeleportGun)){
-			ItemMeta itemMeta = itemStack.getItemMeta();
-			String name = itemMeta.getDisplayName();
-			if(Pattern.compile("Reload").matcher(name).find()){
-				// リロード中のアイテムを持ち替えた場合，リロードの表示を消す
-				itemMeta.setDisplayName(name.substring(0, name.indexOf('>')+1));
-				itemStack.setItemMeta(itemMeta);
-			}
-		}
+		deleteReload(itemStack);
 	}
 
 	@EventHandler
 	public void onPlayerDropItemEvent(PlayerDropItemEvent e){
 		ItemStack itemStack = e.getItemDrop().getItemStack();
-		GFSItem item = this.plugin.getItem(itemStack);
-		if(item != null && (item instanceof Gun || item instanceof TeleportGun)){
-			ItemMeta itemMeta = itemStack.getItemMeta();
-			String name = itemMeta.getDisplayName();
-			if(Pattern.compile("Reload").matcher(name).find()){
-				// リロード中のアイテムを捨てた場合，リロードの表示を消す
-				itemMeta.setDisplayName(name.substring(0, name.indexOf('>')+1));
-				itemStack.setItemMeta(itemMeta);
-			}
+		deleteReload(itemStack);
+	}
+
+	@EventHandler
+	public void onInventoryClickEvent(InventoryClickEvent e){
+		ItemStack itemStack = e.getCurrentItem();
+		deleteReload(itemStack);
+	}
+
+	@EventHandler
+	public void onEntityDeathEvent(EntityDeathEvent e){
+		Entity entity = e.getEntity();
+		if(entity instanceof Player){
+			ItemStack itemStack = ((Player)entity).getItemInHand();
+			deleteReload(itemStack);
 		}
 	}
 
@@ -180,6 +180,19 @@ public class GFSListener implements Listener{
 			// プレイヤーが持っているのは銃か
 			if(item instanceof Gun){
 				((Gun)item).hit(proj.getLocation());
+			}
+		}
+	}
+
+	public void deleteReload(ItemStack itemStack){
+		GFSItem item = this.plugin.getItem(itemStack);
+		if(item != null && (item instanceof Gun || item instanceof TeleportGun)){
+			ItemMeta itemMeta = itemStack.getItemMeta();
+			String name = itemMeta.getDisplayName();
+			if(Pattern.compile("Reload").matcher(name).find()){
+				// リロード中のアイテムの場合，リロードの表示を消す
+				itemMeta.setDisplayName(name.substring(0, name.indexOf('>')+1));
+				itemStack.setItemMeta(itemMeta);
 			}
 		}
 	}

@@ -50,6 +50,7 @@ public class ReloadTimer extends BukkitRunnable {
     			itemMeta.setLore(lore);
 
     			itemStack.setItemMeta(itemMeta);
+    			itemStack.setAmount(1);
     			player.setItemInHand(itemStack);
 
     			player.getWorld().playSound(player.getLocation(), finishReloadSound, 2, finishReloadSoundPitch);

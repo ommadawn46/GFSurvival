@@ -33,6 +33,7 @@ public class CoolTimer extends BukkitRunnable {
     			lore.remove(lore.size()-1);
     			itemMeta.setLore(lore);
     			itemStack.setItemMeta(itemMeta);
+    			itemStack.setAmount(1);
     			player.setItemInHand(itemStack);
     		}
     	}

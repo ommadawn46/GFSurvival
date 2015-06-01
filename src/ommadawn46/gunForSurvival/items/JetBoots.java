@@ -104,6 +104,10 @@ public class JetBoots extends GFSItem{
 			return;
 		}
 
+		if(jump <= 0){
+			return;
+		}
+
 		// プレイヤーを上方向に加速させる
 		Vector vector = player.getVelocity();
 		vector.setY(jump);
