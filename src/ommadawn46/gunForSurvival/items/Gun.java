@@ -123,14 +123,20 @@ public class Gun extends GFSItem{
 		}
 
 		if(ammoRemain > 0){
-			// 銃弾を発射する
 			Location loc = player.getEyeLocation();
 			Vector vec = new Vector(loc.getDirection().getX()*bulletSpeed ,loc.getDirection().getY()*bulletSpeed ,loc.getDirection().getZ()*bulletSpeed);
-			Entity bullet = player.getWorld().spawnEntity(loc.add(loc.getDirection().getX()*1.5, loc.getDirection().getY()*1.5, loc.getDirection().getZ()*1.5), bulletType);
-			bullet.setVelocity(vec);
-			if(bullet instanceof Projectile){
-				((Projectile)bullet).setShooter(player);
+
+			// 弾の種類がProjectileのサブクラスかどうか
+			if(Projectile.class.isAssignableFrom(bulletType.getEntityClass())){
+				// ProjectileならlaunchProjectileメソッドを使用する
+				Projectile proj = player.launchProjectile(bulletType.getEntityClass().asSubclass(Projectile.class));
+				proj.setVelocity(vec);
+			}else{
+				// その他のEntity
+				Entity bullet = player.getWorld().spawnEntity(loc.add(loc.getDirection().getX()*1.5, loc.getDirection().getY()*1.5, loc.getDirection().getZ()*1.5), bulletType);
+				bullet.setVelocity(vec);
 			}
+
 			loc.getWorld().playSound(loc, shotSound, 3, shotSoundPitch);
 
 			ammoRemain--;
