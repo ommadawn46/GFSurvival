@@ -2,7 +2,6 @@ Gun:
 - Name: Rifle
   Material: CLAY_BRICK
   Lore:
-  - This is a Gun.
   - Rifle
   AmmoSize: '15'
   Cooltime: '20'
@@ -10,6 +9,10 @@ Gun:
   BulletType: SNOWBALL
   BulletDamage: '5.0'
   BulletSpeed: '4.0'
+  Recoil: '0.00'
+  Dispersion: '0.01'
+  KnockBack: '1.5'
+  KnockUp: '0.5'
   BurstShot: '1'
   BurstInterval: '0'
   ShotSound: BLAZE_HIT
@@ -22,14 +25,17 @@ Gun:
 - Name: MachineGun
   Material: IRON_INGOT
   Lore:
-  - This is a Gun.
   - Machine Gun
   AmmoSize: '50'
   Cooltime: '3'
   Reloadtime: '50'
   BulletType: SNOWBALL
-  BulletDamage: '2.0'
+  BulletDamage: '1'
   BulletSpeed: '3.5'
+  Recoil: '0.00'
+  Dispersion: '0.05'
+  KnockBack: '0.3'
+  KnockUp: '0.0'
   BurstShot: '2'
   BurstInterval: '3'
   ShotSound: BLAZE_HIT
@@ -39,17 +45,43 @@ Gun:
   FinishReloadSound: ANVIL_LAND
   FinishReloadSoundPitch: '2.0'
 
+- Name: ShotGun
+  Material: IRON_INGOT
+  Lore:
+  - Shot Gun
+  AmmoSize: '8'
+  Cooltime: '35'
+  Reloadtime: '60'
+  BulletType: SNOWBALL
+  BulletDamage: '1'
+  BulletSpeed: '2.5'
+  Recoil: '0.00'
+  Dispersion: '0.20'
+  KnockBack: '0.5'
+  KnockUp: '0.1'
+  BurstShot: '30'
+  BurstInterval: '0'
+  ShotSound: BLAZE_HIT
+  ShotSoundPitch: '0.3'
+  ReloadSound: ANVIL_USE
+  ReloadSoundPitch: '1.2'
+  FinishReloadSound: ANVIL_LAND
+  FinishReloadSoundPitch: '1.2'
+
 - Name: RocketLauncher
   Material: GOLD_INGOT
   Lore:
-  - This is a Gun.
   - Rocket Launcher
   AmmoSize: '5'
   Cooltime: '30'
   Reloadtime: '100'
   BulletType: FIREBALL
-  BulletDamage: '10.0'
+  BulletDamage: '7.5'
   BulletSpeed: '3.0'
+  Recoil: '0.00'
+  Dispersion: '0.02'
+  KnockBack: '2.0'
+  KnockUp: '0.8'
   BurstShot: '1'
   BurstInterval: '3'
   ShotSound: BLAZE_HIT
@@ -63,7 +95,6 @@ TeleportGun:
 - Name: TeleportGun
   Material: DIAMOND
   Lore:
-  - This is a TeleportGun.
   - Teleport Gun
   AmmoSize: '3'
   Cooltime: '20'
@@ -80,7 +111,6 @@ ThunderRod:
 - Name: ThunderRod
   Material: BLAZE_ROD
   Lore:
-  - This is a ThunderRod.
   - Thunder Rod
   Cooltime: '30'
   Range: '100'
@@ -89,7 +119,6 @@ FlyingPotion:
 - Name: FlyingPotion
   Material: POTION
   Lore:
-  - This is a FlyingPotion.
   - Flying Potion
   Duration: "100"
   ConsumeSound: ENDERMAN_TELEPORT
@@ -99,7 +128,6 @@ JetBoots:
 - Name: JetBoots
   Material: GOLD_BOOTS
   Lore:
-  - This is a JetBoots
   - Jet Boots
   Cooltime: '20'
   HopUp: '0.5'

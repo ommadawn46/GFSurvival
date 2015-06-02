@@ -84,7 +84,7 @@ public class JetBoots extends GFSItem{
 		player.setFallDistance(0);
 		player.setVelocity(vector);
 
-		player.getWorld().playSound(player.getLocation(), jetSound, 3, jetSoundPitch);
+		player.getWorld().playSound(player.getLocation(), jetSound, 0.8f, jetSoundPitch);
 
 		// loreの最後の行にステータスを記述する
 		lore.add("<CoolTime>");
@@ -115,7 +115,7 @@ public class JetBoots extends GFSItem{
 		player.setFallDistance(0);
 		player.setVelocity(vector);
 
-		player.getWorld().playSound(player.getLocation(), jetSound, 3, jetSoundPitch);
+		player.getWorld().playSound(player.getLocation(), jetSound, 0.8f, jetSoundPitch);
 
 		// loreの最後の行にステータスを記述する
 		lore.add("<CoolTime>");

@@ -12,8 +12,10 @@ import ommadawn46.gunForSurvival.ReloadTimer;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Sound;
+import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -32,6 +34,12 @@ public class Gun extends GFSItem{
 	private EntityType bulletType;
 	private double bulletDamage;
 	private double bulletSpeed;
+
+	private double recoil;
+	private double dispersion;
+
+	private double knockBack;
+	private double knockUp;
 
 	private int burstShot;
 	private int burstInterval;
@@ -54,6 +62,12 @@ public class Gun extends GFSItem{
 		this.bulletType = EntityType.valueOf((String)itemInfo.get("BulletType"));
 		this.bulletDamage = Double.parseDouble((String) itemInfo.get("BulletDamage"));
 		this.bulletSpeed = Double.parseDouble((String) itemInfo.get("BulletSpeed"));
+
+		this.recoil = Double.parseDouble((String) itemInfo.get("Recoil"));
+		this.dispersion = Double.parseDouble((String) itemInfo.get("Dispersion"));
+
+		this.knockBack = Double.parseDouble((String) itemInfo.get("KnockBack"));
+		this.knockUp = Double.parseDouble((String) itemInfo.get("KnockUp"));
 
 		this.burstShot =  Integer.parseInt((String) itemInfo.get("BurstShot"));
 		this.burstInterval = Integer.parseInt((String) itemInfo.get("BurstInterval"));
@@ -106,8 +120,31 @@ public class Gun extends GFSItem{
 			// 銃弾と異なるEntityTypeのとき
 			return;
 		}
-		// ダメージをセットする
-		e.setDamage(bulletDamage);
+
+		Entity entity = e.getEntity();
+		if(proj.getShooter().equals(entity)){
+			// イベントをキャンセルしない場合
+			e.setDamage(bulletDamage);
+		}else{
+			// イベントをキャンセルする場合
+			e.setCancelled(true);
+			if(entity instanceof LivingEntity){
+				// ダメージのセット
+				if(!(entity instanceof EnderDragon)){
+					((LivingEntity)entity).damage(bulletDamage);
+				}else{
+					// エンダードラゴンはdamageでダメージを与えられないので直接Healthを引く
+					double health = ((LivingEntity)entity).getHealth();
+					((LivingEntity)entity).setHealth(health - bulletDamage);
+				}
+				((LivingEntity)entity).setNoDamageTicks(0);
+
+				// ノックバックのセット
+				Vector vec = entity.getVelocity().add(entity.getLocation().toVector().subtract(((Player)proj.getShooter()).getLocation().toVector())).normalize().multiply(knockBack);
+				vec.setY(vec.getY() + knockUp);
+				entity.setVelocity(vec);
+			}
+		}
 	}
 
 	public void hit(Location loc){
@@ -121,7 +158,6 @@ public class Gun extends GFSItem{
 		int ammoRemain = getAmmoRemain(name);
 
 		if(Pattern.compile("Reload").matcher(name).find()){
-			//reload(player, itemStack);
 			return;
 		}
 
@@ -131,14 +167,24 @@ public class Gun extends GFSItem{
 		}
 
 		if(ammoRemain > 0){
-			Location loc = player.getEyeLocation();
-			Vector vec = new Vector(loc.getDirection().getX()*bulletSpeed ,loc.getDirection().getY()*bulletSpeed ,loc.getDirection().getZ()*bulletSpeed);
 			int useBullet = burstShot < ammoRemain ? burstShot : ammoRemain;
+
+			// ショットガンの場合は弾を1発だけ消費する
+			boolean isShotGun = false;
+			if(burstInterval <= 0 && 1 < burstShot){
+				isShotGun = true;
+				useBullet = burstShot;
+				ammoRemain--;
+				itemMeta.setDisplayName(itemStack.getItemMeta().getDisplayName().split(" <")[0] + " <"+ammoRemain+"/"+ammoSize+">");
+				itemStack.setItemMeta(itemMeta);
+			}
 
 			// ShotTimerのセット
 			for(int i = 0; i < useBullet; i++){
-				ammoRemain--;
-				new ShotTimer(itemStack, player, vec, bulletType, ammoRemain, ammoSize).runTaskLater(plugin, burstInterval*i);
+				if(!isShotGun){
+					ammoRemain--;
+				}
+				new ShotTimer(itemStack, player, bulletType, recoil, dispersion, ammoRemain, ammoSize).runTaskLater(plugin, burstInterval*i);
 			}
 
 			// loreの最後の行にステータスを記述する
@@ -194,7 +240,7 @@ public class Gun extends GFSItem{
 
 		itemMeta.setDisplayName(itemStack.getItemMeta().getDisplayName() + " [Reload]");
 		itemStack.setItemMeta(itemMeta);
-		player.getWorld().playSound(player.getLocation(), reloadSound, 2, reloadSoundPitch);
+		player.getWorld().playSound(player.getLocation(), reloadSound, 0.8f, reloadSoundPitch);
 
 		new ReloadTimer(itemStack, player, itemStack.getItemMeta().getDisplayName().split(" <")[0] + " <"+ammoRemain+"/"+ammoSize+">",
 				finishReloadSound, finishReloadSoundPitch).runTaskLater(this.plugin, reloadTime);
@@ -203,20 +249,20 @@ public class Gun extends GFSItem{
 	private class ShotTimer extends BukkitRunnable{
 		private ItemStack itemStack;
 		private Player player;
-		private Location loc;
-		private Vector vec;
 		private EntityType bulletType;
 		private boolean bulletIsProjectile;
+		private double recoil;
+		private double dispersion;
 		private int ammoRemain;
 		private int ammoSize;
 
-		public ShotTimer(ItemStack itemStack, Player player, Vector vec, EntityType bulletType, int ammoRemain, int ammoSize){
+		public ShotTimer(ItemStack itemStack, Player player, EntityType bulletType, double recoil, double dispersion, int ammoRemain, int ammoSize){
 			this.itemStack = itemStack;
 			this.player = player;
-			this.loc = player.getEyeLocation();
-			this.vec = vec;
 			this.bulletType = bulletType;
 			this.bulletIsProjectile = Projectile.class.isAssignableFrom(this.bulletType.getEntityClass()); // 弾がProjectileのサブクラスかどうか
+			this.recoil = recoil;
+			this.dispersion = dispersion;
 			this.ammoRemain = ammoRemain;
 			this.ammoSize = ammoSize;
 		}
@@ -232,15 +278,27 @@ public class Gun extends GFSItem{
 	    	}
 	    	ItemMeta itemMeta = itemStack.getItemMeta();
 		    if(playerItem.getItemMeta().getDisplayName().equals(itemMeta.getDisplayName())){
+		    	if(recoil != 0){
+		    		// リコイルのセット
+		    		Vector recoilVec = new Vector(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5).normalize().multiply(recoil);
+		    		Vector playerDir = player.getLocation().getDirection().add(recoilVec).normalize();
+		    		player.teleport(player.getLocation().setDirection(playerDir));
+		    	}
+
+		    	// dispersionに応じて弾をばらけさせる
+		    	Vector dispersionVec = new Vector(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5).normalize().multiply(dispersion);
+		    	Location eyeloc = player.getEyeLocation();
+				Vector vec = eyeloc.getDirection().add(dispersionVec).normalize().multiply(bulletSpeed);
+
 				// 弾の発射
 				if(bulletIsProjectile){
 					Projectile proj = player.launchProjectile(bulletType.getEntityClass().asSubclass(Projectile.class));
 					proj.setVelocity(vec);
 				}else{
-					Entity bullet = player.getWorld().spawnEntity(loc.add(loc.getDirection().getX()*1.5, loc.getDirection().getY()*1.5, loc.getDirection().getZ()*1.5), bulletType);
+					Entity bullet = player.getWorld().spawnEntity(eyeloc.add(eyeloc.getDirection().getX()*1.5, eyeloc.getDirection().getY()*1.5, eyeloc.getDirection().getZ()*1.5), bulletType);
 					bullet.setVelocity(vec);
 				}
-				loc.getWorld().playSound(loc, shotSound, 3, shotSoundPitch);
+				eyeloc.getWorld().playSound(eyeloc, shotSound, 0.8f, shotSoundPitch);
 
 				itemMeta.setDisplayName(itemStack.getItemMeta().getDisplayName().split(" <")[0] + " <"+ammoRemain+"/"+ammoSize+">");
 				itemStack.setItemMeta(itemMeta);

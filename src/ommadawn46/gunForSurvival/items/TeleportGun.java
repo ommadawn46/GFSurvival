@@ -116,7 +116,7 @@ public class TeleportGun extends GFSItem{
 
 			player.teleport(loc);
 			player.setVelocity(dic.multiply(0.5));
-			player.getWorld().playSound(loc, shotSound, 3, shotSoundPitch);
+			player.getWorld().playSound(loc, shotSound, 0.8f, shotSoundPitch);
 
 			ammoRemain--;
 			itemMeta.setDisplayName(itemStack.getItemMeta().getDisplayName().split(" <")[0] + " <"+ammoRemain+"/"+ammoSize+">");
@@ -190,7 +190,7 @@ public class TeleportGun extends GFSItem{
 		if(!Pattern.compile("Reload").matcher(name).find()){
 			itemMeta.setDisplayName(itemStack.getItemMeta().getDisplayName() + " [Reload]");
 			itemStack.setItemMeta(itemMeta);
-			player.getWorld().playSound(player.getLocation(), reloadSound, 2, reloadSoundPitch);
+			player.getWorld().playSound(player.getLocation(), reloadSound, 0.8f, reloadSoundPitch);
 		}
 		new ReloadTimer(itemStack, player, itemStack.getItemMeta().getDisplayName().split(" <")[0] + " <"+ammoRemain+"/"+ammoSize+">",
 				finishReloadSound, finishReloadSoundPitch).runTaskLater(this.plugin, reloadTime);
