@@ -2,10 +2,10 @@
 Minecraft Spigotサーバ用 アイテム追加プラグイン
 
 ## 追加コマンド
-/gfslist  
+`/gfslist`  
 アイテム一覧  
 
-/gfs <player> <itemName>  
+`/gfs <player> <itemName>`  
 プレイヤーにアイテムを付与
 
 ## アイテム追加
