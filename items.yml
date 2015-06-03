@@ -133,7 +133,7 @@ JetBoots:
   HopUp: '0.5'
   HorizontalAccel: '8.0'
   UpAccel: '1.5'
-  DownAccel: '1.5'
+  DownAccel: '4.0'
   Jump: '0.0'
   NoFallingDamage: true
   JetSound: IRONGOLEM_HIT

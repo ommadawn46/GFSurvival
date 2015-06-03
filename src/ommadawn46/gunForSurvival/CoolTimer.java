@@ -1,6 +1,5 @@
 package ommadawn46.gunForSurvival;
 
-import java.util.List;
 import java.util.regex.Pattern;
 
 import org.bukkit.entity.Player;
@@ -9,10 +8,12 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class CoolTimer extends BukkitRunnable {
+	String cooltimeID;
     ItemStack itemStack;
     Player player;
 
-    public CoolTimer(ItemStack itemStack, Player player) {
+    public CoolTimer(String cooltimeID, ItemStack itemStack, Player player) {
+    	this.cooltimeID = cooltimeID;
         this.itemStack = itemStack;
         this.player = player;
     }
@@ -20,18 +21,15 @@ public class CoolTimer extends BukkitRunnable {
     @Override
     public void run() {
     	ItemStack playerItem = player.getItemInHand();
-    	if(playerItem == null){
-    		return;
-    	}
     	if(!playerItem.hasItemMeta()){
     		return;
     	}
     	ItemMeta itemMeta = itemStack.getItemMeta();
-    	if(playerItem.getItemMeta().getDisplayName().equals(itemMeta.getDisplayName())){
-    		List<String> lore = itemMeta.getLore();
-    		if(lore.size() > 0 && Pattern.compile("CoolTime").matcher(lore.get(lore.size()-1)).find()){
-    			lore.remove(lore.size()-1);
-    			itemMeta.setLore(lore);
+    	String name = itemMeta.getDisplayName();
+    	if(playerItem.getItemMeta().getDisplayName().equals(name)){
+    		if(Pattern.compile(cooltimeID).matcher(name).find()){
+    			name = name.split(cooltimeID)[0];
+    			itemMeta.setDisplayName(name);
     			itemStack.setItemMeta(itemMeta);
     			itemStack.setAmount(1);
     			player.setItemInHand(itemStack);

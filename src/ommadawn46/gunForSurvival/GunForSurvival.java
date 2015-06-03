@@ -98,6 +98,9 @@ public class GunForSurvival extends JavaPlugin{
     	try {
 			itemData.load(filePath);
 		} catch (IOException | InvalidConfigurationException e1) {
+			// データフォルダの作成
+			getDataFolder().mkdir();
+
 			// ファイルが存在しない時はデフォルトファイルをコピーする
 			InputStream inputStream = this.getClass().getResourceAsStream("/items.yml");
 			try {

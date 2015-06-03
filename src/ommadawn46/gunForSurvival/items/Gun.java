@@ -1,7 +1,6 @@
 package ommadawn46.gunForSurvival.items;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -27,6 +26,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 public class Gun extends GFSItem{
+	private final String cooltimeID = "" + ChatColor.YELLOW + ChatColor.WHITE + ChatColor.RESET;
+
 	private int ammoSize;
 	private int coolTime;
 	private int reloadTime;
@@ -154,15 +155,14 @@ public class Gun extends GFSItem{
 	private void shot(Player player, ItemStack itemStack){
 		ItemMeta itemMeta = itemStack.getItemMeta();
 		String name = itemMeta.getDisplayName();
-		List<String> lore = itemStack.getItemMeta().getLore();
 		int ammoRemain = getAmmoRemain(name);
 
 		if(Pattern.compile("Reload").matcher(name).find()){
 			return;
 		}
 
-		if(lore.size() > 0 && Pattern.compile("CoolTime").matcher(lore.get(lore.size()-1)).find()){
-			new CoolTimer(itemStack, player).runTaskLater(this.plugin, coolTime);
+		if(Pattern.compile(cooltimeID).matcher(name).find()){
+			new CoolTimer(cooltimeID, itemStack, player).runTaskLater(this.plugin, coolTime);
 			return;
 		}
 
@@ -184,20 +184,10 @@ public class Gun extends GFSItem{
 				if(!isShotGun){
 					ammoRemain--;
 				}
-				new ShotTimer(itemStack, player, bulletType, recoil, dispersion, ammoRemain, ammoSize).runTaskLater(plugin, burstInterval*i);
+				new ShotTimer(cooltimeID, itemStack, player, bulletType, recoil, dispersion, ammoRemain, ammoSize).runTaskLater(plugin, burstInterval*i);
 			}
 
-			// loreの最後の行にステータスを記述する
-			if(Pattern.compile("Reloaded").matcher(lore.get(lore.size()-1)).find()){
-				lore.set(lore.size()-1, "<CoolTime>");
-			}else{
-				lore.add("<CoolTime>");
-			}
-			itemMeta.setLore(lore);
-
-			itemStack.setItemMeta(itemMeta);
-
-			new CoolTimer(itemStack, player).runTaskLater(this.plugin, coolTime);
+			new CoolTimer(cooltimeID, itemStack, player).runTaskLater(this.plugin, coolTime);
 		}else if(ammoRemain == 0){
 			// 弾切れ
 			reload(player, itemStack);
@@ -221,11 +211,10 @@ public class Gun extends GFSItem{
 	private void reload(Player player, ItemStack itemStack){
 		ItemMeta itemMeta = itemStack.getItemMeta();
 		String name = itemMeta.getDisplayName();
-		List<String> lore = itemStack.getItemMeta().getLore();
 		int ammoRemain = getAmmoRemain(name);
 
-		if(lore.size() > 0 && Pattern.compile("CoolTime").matcher(lore.get(lore.size()-1)).find()){
-			new CoolTimer(itemStack, player).runTaskLater(this.plugin, coolTime);
+		if(Pattern.compile(cooltimeID).matcher(name).find()){
+			new CoolTimer(cooltimeID, itemStack, player).runTaskLater(this.plugin, coolTime);
 			return;
 		}
 
@@ -247,6 +236,7 @@ public class Gun extends GFSItem{
 	}
 
 	private class ShotTimer extends BukkitRunnable{
+		private String cooltimeID;
 		private ItemStack itemStack;
 		private Player player;
 		private EntityType bulletType;
@@ -256,7 +246,8 @@ public class Gun extends GFSItem{
 		private int ammoRemain;
 		private int ammoSize;
 
-		public ShotTimer(ItemStack itemStack, Player player, EntityType bulletType, double recoil, double dispersion, int ammoRemain, int ammoSize){
+		public ShotTimer(String cooltimeID, ItemStack itemStack, Player player, EntityType bulletType, double recoil, double dispersion, int ammoRemain, int ammoSize){
+			this.cooltimeID = cooltimeID;
 			this.itemStack = itemStack;
 			this.player = player;
 			this.bulletType = bulletType;
@@ -270,9 +261,6 @@ public class Gun extends GFSItem{
 		@Override
 		public void run(){
 			ItemStack playerItem = player.getItemInHand();
-	    	if(playerItem == null){
-	    		return;
-	    	}
 	    	if(!playerItem.hasItemMeta()){
 	    		return;
 	    	}
@@ -300,7 +288,7 @@ public class Gun extends GFSItem{
 				}
 				eyeloc.getWorld().playSound(eyeloc, shotSound, 0.8f, shotSoundPitch);
 
-				itemMeta.setDisplayName(itemStack.getItemMeta().getDisplayName().split(" <")[0] + " <"+ammoRemain+"/"+ammoSize+">");
+				itemMeta.setDisplayName(itemStack.getItemMeta().getDisplayName().split(" <")[0] + " <"+ammoRemain+"/"+ammoSize+">" + cooltimeID);
 				itemStack.setItemMeta(itemMeta);
 				player.setItemInHand(itemStack);
 	    	}

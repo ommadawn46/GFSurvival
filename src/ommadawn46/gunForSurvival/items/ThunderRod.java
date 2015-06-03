@@ -1,6 +1,5 @@
 package ommadawn46.gunForSurvival.items;
 
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -17,6 +16,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.BlockIterator;
 
 public class ThunderRod extends GFSItem{
+	private final String cooltimeID = "" + ChatColor.YELLOW + ChatColor.WHITE + ChatColor.RESET;
+
 	private int cooltime;
 	private int range;
 
@@ -42,12 +43,14 @@ public class ThunderRod extends GFSItem{
 	}
 
 	private void shot(Player player, ItemStack itemStack){
-		List<String> lore = itemStack.getItemMeta().getLore();
+		ItemMeta itemMeta = itemStack.getItemMeta();
+		String name = itemMeta.getDisplayName();
 
-		if(lore.size() > 0 && Pattern.compile("CoolTime").matcher(lore.get(lore.size()-1)).find()){
-			new CoolTimer(itemStack, player).runTaskLater(this.plugin, cooltime);
+		if(Pattern.compile(cooltimeID).matcher(name).find()){
+			new CoolTimer(cooltimeID, itemStack, player).runTaskLater(this.plugin, cooltime);
 			return;
 		}
+
 		// 視線上のブロックへ雷を落とす
 		Block target = getTargetBlock(player, range);
 
@@ -59,19 +62,10 @@ public class ThunderRod extends GFSItem{
 
 		player.getWorld().strikeLightning(loc);
 
-		ItemMeta itemMeta = itemStack.getItemMeta();
-
-		// loreの最後の行にステータスを記述する
-		if(Pattern.compile("Reloaded").matcher(lore.get(lore.size()-1)).find()){
-			lore.set(lore.size()-1, "<CoolTime>");
-		}else{
-			lore.add("<CoolTime>");
-		}
-		itemMeta.setLore(lore);
-
+		itemMeta.setDisplayName(name + cooltimeID);
 		itemStack.setItemMeta(itemMeta);
 
-		new CoolTimer(itemStack, player).runTaskLater(this.plugin, cooltime);
+		new CoolTimer(cooltimeID, itemStack, player).runTaskLater(this.plugin, cooltime);
 	}
 
 	private Block getTargetBlock(Player player, int range) {

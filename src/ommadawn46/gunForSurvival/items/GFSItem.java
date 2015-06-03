@@ -27,12 +27,14 @@ public abstract class GFSItem{
 		this.rawName = (String) itemInfo.get("Name");
 		this.displayName = null; // 各アイテムクラスでmakeDisplayName()を呼び出すこと
 		this.material = Material.valueOf((String)itemInfo.get("Material"));
-		this.orgLore = (List<String>) itemInfo.get("Lore");
 
 		ItemStack itemStack = new ItemStack(material, 1);
-		ItemMeta itemMeta = itemStack.getItemMeta();
-		itemMeta.setLore(this.orgLore);
-		itemStack.setItemMeta(itemMeta);
+		if(itemInfo.containsKey("Lore")){
+			this.orgLore = (List<String>) itemInfo.get("Lore");
+			ItemMeta itemMeta = itemStack.getItemMeta();
+			itemMeta.setLore(this.orgLore);
+			itemStack.setItemMeta(itemMeta);
+		}
 		this.orgItemStack = itemStack;
 	}
 

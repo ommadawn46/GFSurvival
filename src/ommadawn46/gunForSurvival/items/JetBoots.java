@@ -1,6 +1,5 @@
 package ommadawn46.gunForSurvival.items;
 
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -16,6 +15,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 public class JetBoots extends GFSItem{
+	private final String cooltimeID = "" + ChatColor.YELLOW + ChatColor.WHITE + ChatColor.RESET;
+
 	private int coolTime;
 	private double hopUp;
 	private double horizontalAccel;
@@ -65,10 +66,10 @@ public class JetBoots extends GFSItem{
 
 	private void accel(Player player, ItemStack itemStack){
 		ItemMeta itemMeta = itemStack.getItemMeta();
-		List<String> lore = itemStack.getItemMeta().getLore();
+		String name = itemMeta.getDisplayName();
 
-		if(lore.size() > 0 && Pattern.compile("CoolTime").matcher(lore.get(lore.size()-1)).find()){
-			new BootsCoolTimer(itemStack, player).runTaskLater(this.plugin, coolTime);
+		if(Pattern.compile(cooltimeID).matcher(name).find()){
+			new BootsCoolTimer(cooltimeID, itemStack, player).runTaskLater(this.plugin, coolTime);
 			return;
 		}
 
@@ -86,21 +87,18 @@ public class JetBoots extends GFSItem{
 
 		player.getWorld().playSound(player.getLocation(), jetSound, 0.8f, jetSoundPitch);
 
-		// loreの最後の行にステータスを記述する
-		lore.add("<CoolTime>");
-		itemMeta.setLore(lore);
-
+		itemMeta.setDisplayName(name + cooltimeID);
 		itemStack.setItemMeta(itemMeta);
 
-		new BootsCoolTimer(itemStack, player).runTaskLater(this.plugin, coolTime);
+		new BootsCoolTimer(cooltimeID, itemStack, player).runTaskLater(this.plugin, coolTime);
 	}
 
 	private void jump(Player player, ItemStack itemStack){
 		ItemMeta itemMeta = itemStack.getItemMeta();
-		List<String> lore = itemStack.getItemMeta().getLore();
+		String name = itemMeta.getDisplayName();
 
-		if(lore.size() > 0 && Pattern.compile("CoolTime").matcher(lore.get(lore.size()-1)).find()){
-			new BootsCoolTimer(itemStack, player).runTaskLater(this.plugin, coolTime);
+		if(Pattern.compile(cooltimeID).matcher(name).find()){
+			new BootsCoolTimer(cooltimeID, itemStack, player).runTaskLater(this.plugin, coolTime);
 			return;
 		}
 
@@ -117,20 +115,19 @@ public class JetBoots extends GFSItem{
 
 		player.getWorld().playSound(player.getLocation(), jetSound, 0.8f, jetSoundPitch);
 
-		// loreの最後の行にステータスを記述する
-		lore.add("<CoolTime>");
-		itemMeta.setLore(lore);
-
+		itemMeta.setDisplayName(name + cooltimeID);
 		itemStack.setItemMeta(itemMeta);
 
-		new BootsCoolTimer(itemStack, player).runTaskLater(this.plugin, coolTime);
+		new BootsCoolTimer(cooltimeID, itemStack, player).runTaskLater(this.plugin, coolTime);
 	}
 
 	public class BootsCoolTimer extends BukkitRunnable {
+		String cooltimeID;
 	    ItemStack itemStack;
 	    Player player;
 
-	    public BootsCoolTimer(ItemStack itemStack, Player player) {
+	    public BootsCoolTimer(String cooltimeID, ItemStack itemStack, Player player) {
+	    	this.cooltimeID = cooltimeID;
 	        this.itemStack = itemStack;
 	        this.player = player;
 	    }
@@ -138,18 +135,15 @@ public class JetBoots extends GFSItem{
 	    @Override
 	    public void run() {
 	    	ItemStack playerBoots = player.getInventory().getBoots();
-	    	if(playerBoots == null){
-	    		return;
-	    	}
 	    	if(!playerBoots.hasItemMeta()){
 	    		return;
 	    	}
 	    	ItemMeta itemMeta = itemStack.getItemMeta();
+	    	String name = itemMeta.getDisplayName();
 	    	if(playerBoots.getItemMeta().getDisplayName().equals(itemMeta.getDisplayName())){
-	    		List<String> lore = itemMeta.getLore();
-	    		if(lore.size() > 0 && Pattern.compile("CoolTime").matcher(lore.get(lore.size()-1)).find()){
-	    			lore.remove(lore.size()-1);
-	    			itemMeta.setLore(lore);
+	    		if(Pattern.compile(cooltimeID).matcher(name).find()){
+	    			name = name.split(cooltimeID)[0];
+	    			itemMeta.setDisplayName(name);;
 	    			itemStack.setItemMeta(itemMeta);
 
 	    			PlayerInventory pi = player.getInventory();

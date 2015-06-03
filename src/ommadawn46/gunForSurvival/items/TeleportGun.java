@@ -1,7 +1,6 @@
 package ommadawn46.gunForSurvival.items;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -23,6 +22,8 @@ import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
 
 public class TeleportGun extends GFSItem{
+	private final String cooltimeID = "" + ChatColor.YELLOW + ChatColor.WHITE + ChatColor.RESET;
+
 	private int ammoSize;
 	private int coolTime;
 	private int reloadTime;
@@ -90,7 +91,6 @@ public class TeleportGun extends GFSItem{
 	private void shot(Player player, ItemStack itemStack){
 		ItemMeta itemMeta = itemStack.getItemMeta();
 		String name = itemMeta.getDisplayName();
-		List<String> lore = itemStack.getItemMeta().getLore();
 		int ammoRemain = getAmmoRemain(name);
 
 		if(Pattern.compile("Reload").matcher(name).find()){
@@ -98,8 +98,8 @@ public class TeleportGun extends GFSItem{
 			return;
 		}
 
-		if(lore.size() > 0 && Pattern.compile("CoolTime").matcher(lore.get(lore.size()-1)).find()){
-			new CoolTimer(itemStack, player).runTaskLater(this.plugin, coolTime);
+		if(Pattern.compile(cooltimeID).matcher(name).find()){
+			new CoolTimer(cooltimeID, itemStack, player).runTaskLater(this.plugin, coolTime);
 			return;
 		}
 
@@ -119,19 +119,11 @@ public class TeleportGun extends GFSItem{
 			player.getWorld().playSound(loc, shotSound, 0.8f, shotSoundPitch);
 
 			ammoRemain--;
-			itemMeta.setDisplayName(itemStack.getItemMeta().getDisplayName().split(" <")[0] + " <"+ammoRemain+"/"+ammoSize+">");
-
-			// loreの最後の行にステータスを記述する
-			if(Pattern.compile("Reloaded").matcher(lore.get(lore.size()-1)).find()){
-				lore.set(lore.size()-1, "<CoolTime>");
-			}else{
-				lore.add("<CoolTime>");
-			}
-			itemMeta.setLore(lore);
+			itemMeta.setDisplayName(itemStack.getItemMeta().getDisplayName().split(" <")[0] + " <"+ammoRemain+"/"+ammoSize+">" + cooltimeID);
 
 			itemStack.setItemMeta(itemMeta);
 
-			new CoolTimer(itemStack, player).runTaskLater(this.plugin, coolTime);
+			new CoolTimer(cooltimeID, itemStack, player).runTaskLater(this.plugin, coolTime);
 		}else if(ammoRemain == 0){
 			// 弾切れ
 			reload(player, itemStack);
@@ -175,11 +167,10 @@ public class TeleportGun extends GFSItem{
 	private void reload(Player player, ItemStack itemStack){
 		ItemMeta itemMeta = itemStack.getItemMeta();
 		String name = itemMeta.getDisplayName();
-		List<String> lore = itemStack.getItemMeta().getLore();
 		int ammoRemain = getAmmoRemain(name);
 
-		if(lore.size() > 0 && Pattern.compile("CoolTime").matcher(lore.get(lore.size()-1)).find()){
-			new CoolTimer(itemStack, player).runTaskLater(this.plugin, coolTime);
+		if(Pattern.compile(cooltimeID).matcher(name).find()){
+			new CoolTimer(cooltimeID, itemStack, player).runTaskLater(this.plugin, coolTime);
 			return;
 		}
 
