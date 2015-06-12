@@ -17,11 +17,15 @@ import org.bukkit.util.Vector;
 public class JetBoots extends GFSItem{
 	private final String cooltimeID = "" + ChatColor.YELLOW + ChatColor.WHITE + ChatColor.RESET;
 
+	private int jetDuration;
+	private int jetInterval;
 	private int coolTime;
+	private int jetAmmo;
 	private double hopUp;
 	private double horizontalAccel;
 	private double upAccel;
 	private double downAccel;
+	private boolean setAccel;
 	private double jump;
 	private boolean noFallingDamage;
 	private Sound jetSound;
@@ -31,12 +35,17 @@ public class JetBoots extends GFSItem{
 		super(plugin, itemInfo);
 		this.identifier = ChatColor.YELLOW + "" + ChatColor.RESET;
 
+		this.jetDuration = Integer.parseInt((String) itemInfo.get("JetDuration"));
+		this.jetInterval = Integer.parseInt((String) itemInfo.get("JetInterval"));
 		this.coolTime = Integer.parseInt((String) itemInfo.get("Cooltime"));
+
+		this.jetAmmo = Integer.parseInt((String) itemInfo.get("JetAmmo"));
 
 		this.hopUp = Double.parseDouble((String) itemInfo.get("HopUp"));
 		this.horizontalAccel = Double.parseDouble((String) itemInfo.get("HorizontalAccel"));
 		this.upAccel = Double.parseDouble((String) itemInfo.get("UpAccel"));
 		this.downAccel = Double.parseDouble((String) itemInfo.get("DownAccel"));
+		this.setAccel = (boolean)itemInfo.get("SetAccel");
 		this.jump = Double.parseDouble((String) itemInfo.get("Jump"));
 
 		this.noFallingDamage = (boolean)itemInfo.get("NoFallingDamage");
@@ -73,19 +82,9 @@ public class JetBoots extends GFSItem{
 			return;
 		}
 
-		// プレイヤーを加速させる
-		Vector vector = player.getLocation().getDirection();
-		vector.setX(vector.getX() * horizontalAccel);
-		vector.setZ(vector.getZ() * horizontalAccel);
-		if(vector.getY() > 0){
-			vector.setY(hopUp + vector.getY() * upAccel);
-		}else{
-			vector.setY(hopUp + vector.getY() * downAccel);
+		for(int i = 0; i < jetDuration; i+=jetInterval){
+			new AccelTimer(player).runTaskLater(plugin, i);
 		}
-		player.setFallDistance(0);
-		player.setVelocity(vector);
-
-		player.getWorld().playSound(player.getLocation(), jetSound, 0.8f, jetSoundPitch);
 
 		itemMeta.setDisplayName(name + cooltimeID);
 		itemStack.setItemMeta(itemMeta);
@@ -119,6 +118,38 @@ public class JetBoots extends GFSItem{
 		itemStack.setItemMeta(itemMeta);
 
 		new BootsCoolTimer(cooltimeID, itemStack, player).runTaskLater(this.plugin, coolTime);
+	}
+
+	public class AccelTimer extends BukkitRunnable{
+		Player player;
+
+		public AccelTimer(Player player) {
+			this.player = player;
+		}
+
+		@Override
+		public void run() {
+			if(player.isSprinting()){
+			// プレイヤーを加速させる
+			Vector vector = player.getLocation().getDirection();
+			vector.setX(vector.getX() * horizontalAccel);
+			vector.setZ(vector.getZ() * horizontalAccel);
+			if(vector.getY() > 0){
+				vector.setY(hopUp + vector.getY() * upAccel);
+			}else{
+				vector.setY(hopUp + vector.getY() * downAccel);
+			}
+
+			if(!setAccel){
+				vector = player.getVelocity().add(vector);
+			}
+
+			player.setFallDistance(0);
+			player.setVelocity(vector);
+
+			player.getWorld().playSound(player.getLocation(), jetSound, 0.8f, jetSoundPitch);
+			}
+		}
 	}
 
 	public class BootsCoolTimer extends BukkitRunnable {

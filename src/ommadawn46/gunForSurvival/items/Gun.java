@@ -162,7 +162,7 @@ public class Gun extends GFSItem{
 		}
 
 		if(Pattern.compile(cooltimeID).matcher(name).find()){
-			new CoolTimer(cooltimeID, itemStack, player).runTaskLater(this.plugin, coolTime);
+			new CoolTimer(cooltimeID, itemStack, player).runTaskLater(this.plugin, Math.max(coolTime, burstInterval));
 			return;
 		}
 
@@ -184,10 +184,9 @@ public class Gun extends GFSItem{
 				if(!isShotGun){
 					ammoRemain--;
 				}
-				new ShotTimer(cooltimeID, itemStack, player, bulletType, recoil, dispersion, ammoRemain, ammoSize).runTaskLater(plugin, burstInterval*i);
+				new ShotTimer(itemStack, player,  ammoRemain, useBullet-1 == i).runTaskLater(plugin, burstInterval*i);
 			}
 
-			new CoolTimer(cooltimeID, itemStack, player).runTaskLater(this.plugin, coolTime);
 		}else if(ammoRemain == 0){
 			// 弾切れ
 			reload(player, itemStack);
@@ -236,26 +235,18 @@ public class Gun extends GFSItem{
 	}
 
 	private class ShotTimer extends BukkitRunnable{
-		private String cooltimeID;
 		private ItemStack itemStack;
 		private Player player;
-		private EntityType bulletType;
-		private boolean bulletIsProjectile;
-		private double recoil;
-		private double dispersion;
 		private int ammoRemain;
-		private int ammoSize;
+		private boolean isLast;
+		private boolean bulletIsProjectile;
 
-		public ShotTimer(String cooltimeID, ItemStack itemStack, Player player, EntityType bulletType, double recoil, double dispersion, int ammoRemain, int ammoSize){
-			this.cooltimeID = cooltimeID;
+		public ShotTimer(ItemStack itemStack, Player player, int ammoRemain, boolean isLast){
 			this.itemStack = itemStack;
 			this.player = player;
-			this.bulletType = bulletType;
-			this.bulletIsProjectile = Projectile.class.isAssignableFrom(this.bulletType.getEntityClass()); // 弾がProjectileのサブクラスかどうか
-			this.recoil = recoil;
-			this.dispersion = dispersion;
 			this.ammoRemain = ammoRemain;
-			this.ammoSize = ammoSize;
+			this.isLast = isLast;
+			this.bulletIsProjectile = Projectile.class.isAssignableFrom(bulletType.getEntityClass()); // 弾がProjectileのサブクラスかどうか
 		}
 
 		@Override
@@ -264,8 +255,7 @@ public class Gun extends GFSItem{
 	    	if(!playerItem.hasItemMeta()){
 	    		return;
 	    	}
-	    	ItemMeta itemMeta = itemStack.getItemMeta();
-		    if(playerItem.getItemMeta().getDisplayName().equals(itemMeta.getDisplayName())){
+		    if(playerItem.equals(itemStack)){
 		    	if(recoil != 0){
 		    		// リコイルのセット
 		    		Vector recoilVec = new Vector(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5).normalize().multiply(recoil);
@@ -288,9 +278,14 @@ public class Gun extends GFSItem{
 				}
 				eyeloc.getWorld().playSound(eyeloc, shotSound, 0.8f, shotSoundPitch);
 
+				ItemMeta itemMeta = itemStack.getItemMeta();
 				itemMeta.setDisplayName(itemStack.getItemMeta().getDisplayName().split(" <")[0] + " <"+ammoRemain+"/"+ammoSize+">" + cooltimeID);
 				itemStack.setItemMeta(itemMeta);
 				player.setItemInHand(itemStack);
+
+				if(isLast){
+					new CoolTimer(cooltimeID, itemStack, player).runTaskLater(plugin, coolTime);
+				}
 	    	}
 		}
 	}

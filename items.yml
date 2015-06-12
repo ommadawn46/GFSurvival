@@ -27,7 +27,7 @@ Gun:
   Lore:
   - Machine Gun
   AmmoSize: '50'
-  Cooltime: '3'
+  Cooltime: '0'
   Reloadtime: '50'
   BulletType: SNOWBALL
   BulletDamage: '1'
@@ -36,8 +36,8 @@ Gun:
   Dispersion: '0.05'
   KnockBack: '0.3'
   KnockUp: '0.0'
-  BurstShot: '2'
-  BurstInterval: '3'
+  BurstShot: '3'
+  BurstInterval: '2'
   ShotSound: BLAZE_HIT
   ShotSoundPitch: '2.0'
   ReloadSound: ANVIL_USE
@@ -129,11 +129,14 @@ JetBoots:
   Material: GOLD_BOOTS
   Lore:
   - Jet Boots
-  Cooltime: '20'
+  JetDuration: '20'
+  JetInterval: '5'
+  Cooltime: '30'
   HopUp: '0.5'
   HorizontalAccel: '8.0'
   UpAccel: '1.5'
   DownAccel: '4.0'
+  SetAccel: true
   Jump: '0.0'
   NoFallingDamage: true
   JetSound: IRONGOLEM_HIT
