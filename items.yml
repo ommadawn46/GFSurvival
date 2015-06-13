@@ -125,19 +125,34 @@ FlyingPotion:
   ConsumeSoundPitch: '1.5'
 
 JetBoots:
+- Name: DashBoots
+  Material: IRON_BOOTS
+  Lore:
+  - Dash Boots
+  JetAmmo: '1'
+  JetInterval: '0'
+  Cooltime: '30'
+  HopUp: '0.6'
+  HorizontalAccel: '8.0'
+  UpAccel: '0.0'
+  DownAccel: '0.0'
+  SetAccel: true
+  NoFallingDamage: false
+  JetSound: IRONGOLEM_HIT
+  JetSoundPitch: '1.8'
+
 - Name: JetBoots
   Material: GOLD_BOOTS
   Lore:
   - Jet Boots
-  JetDuration: '20'
+  JetAmmo: '6'
   JetInterval: '5'
-  Cooltime: '30'
+  Cooltime: '15'
   HopUp: '0.5'
   HorizontalAccel: '8.0'
   UpAccel: '1.5'
   DownAccel: '4.0'
   SetAccel: true
-  Jump: '0.0'
   NoFallingDamage: true
   JetSound: IRONGOLEM_HIT
   JetSoundPitch: '1.8'

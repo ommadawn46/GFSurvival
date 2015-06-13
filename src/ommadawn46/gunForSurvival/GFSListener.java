@@ -1,7 +1,5 @@
 package ommadawn46.gunForSurvival;
 
-import java.util.regex.Pattern;
-
 import ommadawn46.gunForSurvival.items.GFSItem;
 import ommadawn46.gunForSurvival.items.Gun;
 import ommadawn46.gunForSurvival.items.JetBoots;
@@ -28,7 +26,6 @@ import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.event.player.PlayerToggleSprintEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 public class GFSListener implements Listener{
 	private GunForSurvival plugin;
@@ -95,19 +92,19 @@ public class GFSListener implements Listener{
 	@EventHandler
 	public void onPlayerItemHeldEvent(PlayerItemHeldEvent e){
 		ItemStack itemStack = e.getPlayer().getInventory().getItem(e.getPreviousSlot());
-		deleteReload(itemStack);
+		deleteStatus(itemStack);
 	}
 
 	@EventHandler
 	public void onPlayerDropItemEvent(PlayerDropItemEvent e){
 		ItemStack itemStack = e.getItemDrop().getItemStack();
-		deleteReload(itemStack);
+		deleteStatus(itemStack);
 	}
 
 	@EventHandler
 	public void onInventoryClickEvent(InventoryClickEvent e){
 		ItemStack itemStack = e.getCurrentItem();
-		deleteReload(itemStack);
+		deleteStatus(itemStack);
 	}
 
 	@EventHandler
@@ -115,7 +112,9 @@ public class GFSListener implements Listener{
 		Entity entity = e.getEntity();
 		if(entity instanceof Player){
 			ItemStack itemStack = ((Player)entity).getItemInHand();
-			deleteReload(itemStack);
+			deleteStatus(itemStack);
+			ItemStack boots = ((Player)entity).getInventory().getBoots();
+			deleteStatus(boots);
 		}
 	}
 
@@ -184,16 +183,10 @@ public class GFSListener implements Listener{
 		}
 	}
 
-	public void deleteReload(ItemStack itemStack){
+	public void deleteStatus(ItemStack itemStack){
 		GFSItem item = this.plugin.getItem(itemStack);
-		if(item != null && (item instanceof Gun || item instanceof TeleportGun)){
-			ItemMeta itemMeta = itemStack.getItemMeta();
-			String name = itemMeta.getDisplayName();
-			if(Pattern.compile("Reload").matcher(name).find()){
-				// リロード中のアイテムの場合，リロードの表示を消す
-				itemMeta.setDisplayName(name.substring(0, name.indexOf('>')+1));
-				itemStack.setItemMeta(itemMeta);
-			}
+		if(item != null && (item instanceof Gun || item instanceof TeleportGun || item instanceof JetBoots)){
+			item.playerAction(null, itemStack, "DELETESTATUS");
 		}
 	}
 }

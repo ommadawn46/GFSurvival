@@ -196,4 +196,61 @@ public class GunForSurvival extends JavaPlugin{
 
         return itemMap.get(name).getItemStack();
     }
+
+    public String getColorFromNumber(int num){
+    	if(num >= 1000){
+    		num = 999;
+    	}
+    	int hund = num / 100;
+    	int teen = (num % 100) / 10;
+    	int digit = num % 10;
+
+    	String str = "" + ChatColor.UNDERLINE + getColorFromDigit(hund) + getColorFromDigit(teen) + getColorFromDigit(digit) + ChatColor.RESET;
+
+    	return str;
+    }
+
+    public int getNumberFromColor(String str){
+    	str = str.replaceAll(""+ChatColor.UNDERLINE, "").replaceAll(""+ChatColor.RESET, "");
+    	if(str.length() != 6){
+    		return -1;
+    	}
+    	String hund = str.substring(0, 2);
+    	String teen = str.substring(2, 4);
+    	String digit = str.substring(4, 6);
+
+    	int num = getDigitFromColor(hund)*100 + getDigitFromColor(teen)*10 + getDigitFromColor(digit);
+
+    	return num;
+    }
+
+    private ChatColor getColorFromDigit(int digit){
+    	switch(digit){
+    		case 0: return ChatColor.AQUA;
+    		case 1: return ChatColor.BLACK;
+    		case 2: return ChatColor.BLUE;
+    		case 3: return ChatColor.DARK_AQUA;
+    		case 4: return ChatColor.DARK_BLUE;
+    		case 5: return ChatColor.DARK_GRAY;
+    		case 6: return ChatColor.DARK_GREEN;
+    		case 7: return ChatColor.DARK_PURPLE;
+    		case 8: return ChatColor.DARK_RED;
+    		case 9: return ChatColor.GOLD;
+    		default : return null;
+    	}
+    }
+
+    private int getDigitFromColor(String color){
+    	if(color.equals(ChatColor.AQUA.toString())) return 0;
+    	else if(color.equals(ChatColor.BLACK.toString())) return 1;
+    	else if(color.equals(ChatColor.BLUE.toString())) return 2;
+    	else if(color.equals(ChatColor.DARK_AQUA.toString())) return 3;
+    	else if(color.equals(ChatColor.DARK_BLUE.toString())) return 4;
+    	else if(color.equals(ChatColor.DARK_GRAY.toString())) return 5;
+    	else if(color.equals(ChatColor.DARK_GREEN.toString())) return 6;
+    	else if(color.equals(ChatColor.DARK_PURPLE.toString())) return 7;
+    	else if(color.equals(ChatColor.DARK_RED.toString())) return 8;
+    	else if(color.equals(ChatColor.GOLD.toString())) return 9;
+    	else return 0;
+    }
 }

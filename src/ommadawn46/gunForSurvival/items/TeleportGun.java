@@ -85,6 +85,8 @@ public class TeleportGun extends GFSItem{
 			shot(player, itemStack);
 		}else if(action.equals("SNEAK")){
 			reload(player, itemStack);
+		}else if(action.equals("DELETESTATUS")){
+			deleteStatus(itemStack);
 		}
 	}
 
@@ -185,5 +187,15 @@ public class TeleportGun extends GFSItem{
 		}
 		new ReloadTimer(itemStack, player, itemStack.getItemMeta().getDisplayName().split(" <")[0] + " <"+ammoRemain+"/"+ammoSize+">",
 				finishReloadSound, finishReloadSoundPitch).runTaskLater(this.plugin, reloadTime);
+	}
+
+	private void deleteStatus(ItemStack itemStack){
+		ItemMeta itemMeta = itemStack.getItemMeta();
+		String name = itemMeta.getDisplayName();
+		if(Pattern.compile("Reload").matcher(name).find()){
+			// リロード中のアイテムの場合，リロードの表示を消す
+			itemMeta.setDisplayName(name.substring(0, name.indexOf('>')+1));
+			itemStack.setItemMeta(itemMeta);
+		}
 	}
 }
